@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# World Cup 26
+
+FIFA World Cup 2026 hub - a live countdown to kickoff and the Final, host-nation highlights, and tournament facts. United 2026: the first 48-team World Cup, hosted across the United States, Canada, and Mexico.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)
+
+## Features
+
+- Live countdown to kickoff (June 11, 2026), auto-switching to the Final (July 19, 2026) once the tournament is live
+- Host-nation highlights for the United States, Canada, and Mexico
+- Tournament facts strip: 48 teams, 104 matches, 16 host cities, 3 nations
+- Floodlit-pitch aesthetic with mowed-grass stripes, grain overlay, and staggered reveal animations
+- Hydration-safe client countdown, reduced-motion aware
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3009](http://localhost:3009).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start the dev server on port 3009 |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build on port 3009 |
+| `npm run typecheck` | Run `tsc --noEmit` |
+| `npm run lint` | Run Next.js lint |
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js 16 (App Router, Turbopack)
+- React 19
+- Tailwind CSS v4
+- Anton (display) + Outfit (body) via `next/font/google`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No environment variables required.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel (planned). Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) are set in `next.config.ts`.
