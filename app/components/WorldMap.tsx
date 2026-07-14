@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   geoOrthographic,
   geoEquirectangular,
@@ -12,11 +12,70 @@ import {
   TEAMS,
   QUALIFIED_ISO3,
   CONFED_LABEL,
+  COUNTRY_INFO,
   GROUP_ACCENTS,
   GROUP_LETTERS,
   textOn,
   type Team,
 } from "../data/teams";
+
+const I = "h-4 w-4";
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" className={I} fill="currentColor" aria-hidden="true">
+    <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
+  </svg>
+);
+const GlobeIcon = () => (
+  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" />
+  </svg>
+);
+const PeopleIcon = () => (
+  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+const AreaIcon = () => (
+  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+  </svg>
+);
+const MoneyIcon = () => (
+  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="2" x2="12" y2="22" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
+
+function StatRow({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
+        style={{ background: `${color}1f`, color }}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--muted)]">{label}</p>
+        <p className="truncate text-sm font-bold text-[var(--navy)]">{value}</p>
+      </div>
+    </div>
+  );
+}
 
 type Feature = { properties: { a3: string }; geometry: unknown };
 type Mode = "flat" | "globe";
@@ -119,14 +178,19 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const qualified = features.filter((f) => QUALIFIED.has(f.properties.a3));
   const others = features.filter((f) => !QUALIFIED.has(f.properties.a3));
   const selectedTeams = selected ? BY_ISO3[selected] ?? [] : [];
+  const selFeat = selected ? qualified.find((f) => f.properties.a3 === selected) : null;
+  const selPath = selFeat ? path(selFeat as never) : null;
+  const selCol = selected
+    ? GROUP_ACCENTS[BY_ISO3[selected]?.[0]?.group] || "#2fa84f"
+    : "#2fa84f";
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-      <div className="flex-1">
-        <div className={`mx-auto w-full ${isGlobe ? "max-w-[680px]" : "max-w-[1200px] overflow-hidden rounded-2xl"}`}>
+      <div className="flex-1 overflow-x-auto">
+        <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            className={`w-full touch-none select-none ${
+            className={`block h-[380px] w-auto max-w-full touch-none select-none sm:h-[520px] ${
               isGlobe
                 ? "cursor-grab active:cursor-grabbing [filter:drop-shadow(0_24px_50px_rgba(20,33,61,0.28))]"
                 : ""
@@ -144,6 +208,9 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               </radialGradient>
               <filter id="pop" x="-30%" y="-30%" width="160%" height="160%">
                 <feDropShadow dx="0" dy="1" stdDeviation="1.4" floodColor="#14213d" floodOpacity="0.35" />
+              </filter>
+              <filter id="sel-glow" x="-120%" y="-120%" width="340%" height="340%">
+                <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#ffffff" floodOpacity="1" />
               </filter>
             </defs>
 
@@ -175,18 +242,33 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                     key={i}
                     d={d}
                     fill={col}
-                    fillOpacity={isSel ? 1 : isHover ? 0.85 : 1}
-                    stroke={isSel || isHover ? "#14213d" : "#ffffff"}
-                    strokeWidth={isSel ? 1.8 : isHover ? 1.2 : 0.8}
+                    fillOpacity={selected && !isSel ? 0.3 : isHover ? 0.85 : 1}
+                    stroke={isHover ? "#14213d" : "#ffffff"}
+                    strokeWidth={isHover ? 1.2 : 0.8}
                     className="cursor-pointer"
                     onPointerEnter={() => setHovered(a3)}
                     onPointerLeave={() => setHovered(null)}
                     onClick={() => pick(a3)}
-                    style={{ transition: "fill 0.15s" }}
+                    style={{ transition: "fill-opacity 0.2s" }}
                   />
                 );
               })}
             </g>
+
+            {/* selected country pops: pulsing glow ring + bright fill on top */}
+            {selPath && (
+              <g className="pointer-events-none">
+                <path
+                  d={selPath}
+                  fill="none"
+                  stroke={selCol}
+                  strokeWidth={5}
+                  filter="url(#sel-glow)"
+                  className="sel-pulse"
+                />
+                <path d={selPath} fill={selCol} stroke="#ffffff" strokeWidth={2.4} />
+              </g>
+            )}
 
             {isGlobe && (
               <circle cx={W / 2} cy={H / 2} r={GLOBE / 2 - 6} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} className="pointer-events-none" />
@@ -235,14 +317,25 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                       Host nation
                     </span>
                   )}
+
+                  {COUNTRY_INFO[t.name] && (
+                    <div className="mt-4 w-full space-y-2.5 border-t border-[var(--border)] pt-4 text-left">
+                      <StatRow icon={<StarIcon />} label="Capital" value={COUNTRY_INFO[t.name].capital} color={GROUP_ACCENTS[t.group]} />
+                      <StatRow icon={<GlobeIcon />} label="Continent" value={COUNTRY_INFO[t.name].continent} color={GROUP_ACCENTS[t.group]} />
+                      <StatRow icon={<PeopleIcon />} label="Population" value={COUNTRY_INFO[t.name].population} color={GROUP_ACCENTS[t.group]} />
+                      <StatRow icon={<AreaIcon />} label="Area" value={COUNTRY_INFO[t.name].area} color={GROUP_ACCENTS[t.group]} />
+                      <StatRow icon={<MoneyIcon />} label="Currency" value={COUNTRY_INFO[t.name].currency} color={GROUP_ACCENTS[t.group]} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center py-6 text-center">
-              <svg viewBox="0 0 24 24" className="h-10 w-10 text-[var(--green)]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M9 11V6a2 2 0 0 1 4 0v5" />
-                <path d="M13 8a2 2 0 0 1 4 0v6a5 5 0 0 1-5 5h-1.5a5 5 0 0 1-4.2-2.3l-1.6-2.5a1.6 1.6 0 0 1 2.5-2l1.3 1.3V8a2 2 0 0 1 4 0" />
+              <svg viewBox="0 0 48 48" className="h-12 w-12 text-[var(--green)]" aria-hidden="true">
+                <circle cx="24" cy="24" r="19" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+                <circle cx="24" cy="24" r="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+                <circle cx="24" cy="24" r="5.5" fill="currentColor" />
               </svg>
               <p className="mt-3 text-sm font-semibold text-[var(--navy)]">Tap any country</p>
               <p className="mt-1 text-xs text-[var(--muted)]">

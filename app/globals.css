@@ -69,6 +69,20 @@ body {
   animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
+@keyframes selpulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.sel-pulse {
+  animation: selpulse 1.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     animation: none;

@@ -96,7 +96,7 @@ export default function ThemeSong() {
         type="button"
         onClick={toggle}
         aria-label={playing ? "Pause theme song" : "Play theme song"}
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--navy)] shadow-md transition-colors hover:border-[var(--navy)]"
+        className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-[var(--navy)] transition-colors hover:border-[var(--navy)]"
       >
         <span className="relative flex h-3.5 w-3.5 items-center justify-end gap-[2px]">
           {playing ? (

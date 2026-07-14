@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Flag from "./Flag";
 import Logo from "./Logo";
+import ThemeSong from "./ThemeSong";
 import {
   TEAMS,
   GROUP_LETTERS,
@@ -190,14 +191,7 @@ function cellState(m: Match, side: "a" | "b"): "win" | "lose" | "tbd" {
 function BracketView() {
   return (
     <div>
-      <p className="mb-5 max-w-2xl text-sm text-[var(--muted)]">
-        Live knockout bracket - real results through the quarter-finals. The semi-finals
-        are set:{" "}
-        <span className="font-semibold text-[var(--navy)]">France v Spain</span> and{" "}
-        <span className="font-semibold text-[var(--navy)]">England v Argentina</span>. The
-        Final is July 19 at MetLife Stadium.
-      </p>
-      <div className="overflow-x-auto pb-4">
+      <div className="overflow-x-auto pb-2">
         <div className="flex min-w-[1050px] gap-3">
           {KO_ROUNDS.map((round) => (
             <div key={round.name} className="flex flex-1 flex-col">
@@ -269,7 +263,7 @@ export default function WorldCupViews() {
               World Cup 2026
             </h1>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-              Canada · Mexico · USA <span className="mx-1 text-[var(--border)]">|</span> 48 Nations
+              48 Nations
             </p>
           </div>
         </div>
@@ -292,6 +286,7 @@ export default function WorldCupViews() {
               </button>
             );
           })}
+          <ThemeSong />
         </nav>
       </header>
 
