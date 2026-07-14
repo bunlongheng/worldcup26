@@ -88,11 +88,12 @@ export const CONFED_LABEL: Record<Confed, string> = {
   OFC: "Oceania",
 };
 
-// accent color cycled across the 12 groups (FIFA 26 brand hues)
+// 12 distinct group colors - shared by the group cards, the map and the panel
+// so the same color always means the same group.
 export const GROUP_ACCENTS: Record<string, string> = {
-  A: "var(--green)", B: "var(--blue)", C: "var(--orange)", D: "var(--lime)",
-  E: "var(--blue-light)", F: "var(--green)", G: "var(--maroon)", H: "var(--gold)",
-  I: "var(--blue)", J: "var(--orange)", K: "var(--green-deep)", L: "var(--lime)",
+  A: "#e63946", B: "#2a9d3f", C: "#1d4ed8", D: "#ea6d0a",
+  E: "#8e24aa", F: "#0e9bb0", G: "#d6336c", H: "#b8860b",
+  I: "#8d5524", J: "#0f766e", K: "#6d8600", L: "#3730a3",
 };
 
 export function teamsByGroup(letter: string): Team[] {
