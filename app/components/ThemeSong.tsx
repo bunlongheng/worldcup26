@@ -57,7 +57,7 @@ export default function ThemeSong() {
         type="button"
         onClick={toggle}
         aria-pressed={playing}
-        title={playing ? "Theme on - tap to mute" : "Play theme song"}
+        title={playing ? "Sound on - tap to mute" : "Play the theme song"}
         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition-colors ${
           playing
             ? "border-[var(--green)] bg-[var(--green)] text-white"
@@ -75,7 +75,7 @@ export default function ThemeSong() {
             <span className="ml-[3px] block border-y-[6px] border-l-[9px] border-y-transparent border-l-[var(--green)]" />
           )}
         </span>
-        {playing ? "Theme On" : "Theme"}
+        Sound
       </button>
     </>
   );
