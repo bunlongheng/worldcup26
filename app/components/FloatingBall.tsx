@@ -163,21 +163,18 @@ export default function FloatingBall() {
     };
   }, []);
 
+  // A single small fixed element - no full-screen wrapper, so nothing can ever
+  // intercept taps or scrolling anywhere else on the page.
   return (
     <div
+      ref={ballRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 overflow-hidden"
-      style={{ zIndex: 2147483000 }}
+      className="fixed left-0 top-0 cursor-grab touch-none select-none active:cursor-grabbing [-webkit-touch-callout:none]"
+      style={{ width: SIZE, height: SIZE, zIndex: 2147483000, willChange: "transform", WebkitUserSelect: "none" }}
     >
-      <div
-        ref={ballRef}
-        className="pointer-events-auto absolute left-0 top-0 cursor-grab touch-none select-none active:cursor-grabbing [-webkit-touch-callout:none]"
-        style={{ width: SIZE, height: SIZE, willChange: "transform", WebkitUserSelect: "none" }}
-      >
-        <div ref={spinRef} style={{ width: SIZE, height: SIZE, willChange: "transform" }}>
-          <div ref={bobRef} className="drop-shadow-[0_5px_9px_rgba(0,0,0,0.16)]">
-            <Image src="/ball.png" alt="" width={SIZE} height={SIZE} priority draggable={false} />
-          </div>
+      <div ref={spinRef} style={{ width: SIZE, height: SIZE, willChange: "transform" }}>
+        <div ref={bobRef} className="drop-shadow-[0_5px_9px_rgba(0,0,0,0.16)]">
+          <Image src="/ball.png" alt="" width={SIZE} height={SIZE} priority draggable={false} />
         </div>
       </div>
     </div>

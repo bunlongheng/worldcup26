@@ -313,14 +313,14 @@ export default function WorldMap({ mode }: { mode: Mode }) {
         <p className="text-center text-sm text-[var(--muted)]">
           {isGlobe ? "Drag to spin. " : ""}Tap a country or a group letter - each color is a group.
         </p>
-        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+        <div className="mx-auto mt-3 grid max-w-md grid-cols-6 gap-2 sm:max-w-2xl sm:grid-cols-12">
           {GROUP_LETTERS.map((letter) => (
             <button
               key={letter}
               type="button"
               onClick={() => pickGroup(letter)}
-              className={`rounded-md px-2.5 py-1 text-xs font-bold transition-transform hover:scale-110 ${
-                activeGroups.has(letter) ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
+              className={`rounded-lg py-2.5 text-base font-extrabold transition-transform active:scale-95 sm:py-2 sm:text-lg ${
+                activeGroups.has(letter) ? "ring-2 ring-[var(--navy)] ring-offset-2" : "hover:brightness-95"
               }`}
               style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
             >
