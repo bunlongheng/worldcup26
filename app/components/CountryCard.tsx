@@ -68,11 +68,6 @@ export default function CountryCard({ team, big = false }: { team: Team; big?: b
           {CONFED_LABEL[team.confed]}
         </span>
       </div>
-      {team.host && (
-        <span className="mt-2 rounded-full bg-[var(--navy)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-          Host nation
-        </span>
-      )}
       {info && (
         <div className="mt-4 w-full space-y-2.5 border-t border-[var(--border)] pt-4 text-left">
           <StatRow icon={<StarIcon />} label="Capital" value={info.capital} color={accent} />
