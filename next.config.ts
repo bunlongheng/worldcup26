@@ -41,7 +41,12 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Never cache the HTML document, so a new deploy is picked up immediately
+      // (the hashed /_next/static assets it points to stay immutably cached).
+      { source: "/", headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }] },
+    ];
   },
 };
 
