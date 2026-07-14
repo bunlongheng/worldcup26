@@ -62,16 +62,16 @@ function FlagsView() {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
         {ordered.map((t) => (
           <button
             key={t.name}
             type="button"
             onClick={() => setOpen(t)}
-            className="flex flex-col items-center rounded-xl border border-[var(--border)] bg-white px-2 py-3.5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
+            className="flex flex-col items-center rounded-xl border border-[var(--border)] bg-white px-2 py-1.5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
           >
-            <Flag code={t.flag} name={t.name} className="h-[48px] w-[72px]" />
-            <span className="mt-2 text-center text-sm font-bold leading-tight text-[var(--navy)]">
+            <Flag code={t.flag} name={t.name} className="h-[40px] w-[60px]" />
+            <span className="mt-1 text-center text-[13px] font-bold leading-tight text-[var(--navy)]">
               {t.name}
             </span>
           </button>
@@ -237,20 +237,20 @@ function GroupsView() {
                             : "bg-[var(--gold)]";
                     const rl = result === "won" ? "W" : result === "lost" ? "L" : result === "draw" ? "D" : "•";
                     return (
-                      <li key={i} className="flex items-center gap-2 py-2">
+                      <li key={i} className="flex items-center gap-2.5 py-2">
                         <span className="w-9 shrink-0 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]">
                           {shortStage(m.stage)}
-                        </span>
-                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white ${rc}`}>
-                          {rl}
-                        </span>
-                        <span className="shrink-0 tabular-nums text-sm font-extrabold text-[var(--navy)]">
-                          {ts == null || os == null ? "vs" : `${ts}–${os}`}
                         </span>
                         {oppTeam && <Flag code={oppTeam.flag} name={opp} className="h-4 w-6 shrink-0" />}
                         <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-[var(--navy)]">
                           {opp}
                           {m.pens ? <span className="text-[10px] font-normal text-[var(--muted)]"> ({m.pens})</span> : null}
+                        </span>
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white ${rc}`}>
+                          {rl}
+                        </span>
+                        <span className="w-10 shrink-0 text-right tabular-nums text-sm font-extrabold text-[var(--navy)]">
+                          {ts == null || os == null ? "vs" : `${ts}–${os}`}
                         </span>
                       </li>
                     );
