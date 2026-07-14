@@ -166,6 +166,32 @@ export const COUNTRY_INFO: Record<string, Info> = {
   Panama: { capital: "Panama City", continent: "North America", population: "4.4M", area: "75.4K km²", currency: "Balboa (PAB)" },
 };
 
+// host cities and their World Cup 2026 stadiums (16 total)
+export const HOST_STADIUMS: Record<string, { city: string; stadium: string }[]> = {
+  Canada: [
+    { city: "Toronto", stadium: "BMO Field" },
+    { city: "Vancouver", stadium: "BC Place" },
+  ],
+  Mexico: [
+    { city: "Mexico City", stadium: "Estadio Azteca" },
+    { city: "Guadalajara", stadium: "Estadio Akron" },
+    { city: "Monterrey", stadium: "Estadio BBVA" },
+  ],
+  "United States": [
+    { city: "Atlanta", stadium: "Mercedes-Benz Stadium" },
+    { city: "Boston", stadium: "Gillette Stadium" },
+    { city: "Dallas", stadium: "AT&T Stadium" },
+    { city: "Houston", stadium: "NRG Stadium" },
+    { city: "Kansas City", stadium: "Arrowhead Stadium" },
+    { city: "Los Angeles", stadium: "SoFi Stadium" },
+    { city: "Miami", stadium: "Hard Rock Stadium" },
+    { city: "New York / New Jersey", stadium: "MetLife Stadium" },
+    { city: "Philadelphia", stadium: "Lincoln Financial Field" },
+    { city: "San Francisco Bay Area", stadium: "Levi's Stadium" },
+    { city: "Seattle", stadium: "Lumen Field" },
+  ],
+};
+
 export function teamsByGroup(letter: string): Team[] {
   return TEAMS.filter((t) => t.group === letter);
 }

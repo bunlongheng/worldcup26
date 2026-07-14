@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 // Official WC26 theme song via the YouTube IFrame API. Autoplay-with-sound is
 // blocked by browsers until a gesture, so it also starts on the first tap.
 const VIDEO_ID = "HmpzUm5j4OE";
-const VOLUME = 4;
+const VOLUME = 15; // low background level (4/100 was nearly silent)
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -98,11 +98,8 @@ export default function ThemeSong() {
 
   return (
     <>
-      {/* hidden but real-sized player so YouTube actually plays the audio */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed bottom-0 left-0 -z-10 h-px w-px overflow-hidden opacity-0"
-      >
+      {/* real-sized player parked off-screen (NOT hidden/0-size, or YouTube blocks audio) */}
+      <div aria-hidden className="pointer-events-none fixed -left-[9999px] top-0 -z-10">
         <div id="wc26-theme-frame" />
       </div>
 
