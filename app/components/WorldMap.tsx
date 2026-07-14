@@ -147,16 +147,16 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   else if (selected) (BY_ISO3[selected] || []).forEach((t) => activeGroups.add(t.group));
 
   return (
-    <div className="flex min-h-[calc(100vh-170px)] flex-col">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="flex-1 overflow-x-auto">
+    <div className="flex min-h-[calc(100vh-170px)] w-full min-w-0 flex-col overflow-x-hidden">
+      <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="min-w-0 flex-1 overflow-x-auto">
         <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            className={`block h-[380px] w-auto max-w-full touch-none select-none sm:h-[520px] ${
+            className={`block max-w-full touch-none select-none ${
               isGlobe
-                ? "cursor-grab active:cursor-grabbing"
-                : ""
+                ? "h-[380px] w-auto cursor-grab active:cursor-grabbing sm:h-[520px]"
+                : "h-[190px] w-auto sm:h-[520px]"
             }`}
             onPointerDown={onDown}
             onPointerMove={onMove}
@@ -241,7 +241,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
         </div>
 
       {/* click-to-reveal panel */}
-      <aside className="w-full shrink-0 lg:w-72">
+      <aside className="w-full min-w-0 shrink-0 lg:w-72">
         <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
           {selectedTeams.length > 0 ? (
             <div className="flex flex-col gap-4">

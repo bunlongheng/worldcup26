@@ -13,6 +13,7 @@ import {
   GROUP_ACCENTS,
   CONFED_LABEL,
   HOST_STADIUMS,
+  matchesFor,
   teamsByGroup,
   textOn,
   type Confed,
@@ -105,23 +106,14 @@ function FlagsView() {
 }
 
 /* ---------- Groups ---------- */
-type KoResult = { round: string; opp: string; result: "won" | "lost" | "upcoming" };
-function teamMatches(name: string): KoResult[] {
-  const out: KoResult[] = [];
-  KO_ROUNDS.forEach((round) =>
-    round.matches.forEach((m) => {
-      if (m.a === name || m.b === name) {
-        const side = m.a === name ? "a" : "b";
-        out.push({
-          round: round.name,
-          opp: m.a === name ? m.b : m.a,
-          result: !m.win ? "upcoming" : m.win === side ? "won" : "lost",
-        });
-      }
-    })
-  );
-  return out;
-}
+const STAGE_SHORT: Record<string, string> = {
+  "Round of 32": "R32",
+  "Round of 16": "R16",
+  "Quarter-final": "QF",
+  "Semi-final": "SF",
+  Final: "F",
+};
+const shortStage = (s: string) => STAGE_SHORT[s] ?? (s.startsWith("Group") ? s.replace("Group ", "GRP ") : s);
 
 function GroupsView() {
   const [detail, setDetail] = useState<Team | null>(null);
@@ -132,7 +124,7 @@ function GroupsView() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const results = detail ? teamMatches(detail.name) : [];
+  const results = detail ? matchesFor(detail.name) : [];
 
   return (
     <>
@@ -213,35 +205,59 @@ function GroupsView() {
 
             <div className="mt-5 overflow-y-auto">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
-                World Cup 2026 - knockout path
+                World Cup 2026 - all matches
               </p>
               {results.length ? (
                 <ul className="divide-y divide-[var(--border)]">
-                  {results.map((m, i) => (
-                    <li key={i} className="flex items-center gap-3 py-2">
-                      <span
-                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white ${
-                          m.result === "won"
-                            ? "bg-[var(--green)]"
-                            : m.result === "lost"
-                              ? "bg-[var(--maroon)]"
-                              : "bg-[var(--gold)]"
-                        }`}
-                      >
-                        {m.result === "won" ? "W" : m.result === "lost" ? "L" : "•"}
-                      </span>
-                      <div className="min-w-0 flex-1 text-left">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">{m.round}</p>
-                        <p className="text-sm font-bold text-[var(--navy)]">
-                          {m.result === "won" ? "Beat " : m.result === "lost" ? "Lost to " : "vs "}
-                          {m.opp}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
+                  {results.map((m, i) => {
+                    const isA = m.a === detail.name;
+                    const opp = isA ? m.b : m.a;
+                    const ts = isA ? m.sa : m.sb;
+                    const os = isA ? m.sb : m.sa;
+                    const oppTeam = BY_NAME[opp];
+                    const result =
+                      ts == null || os == null
+                        ? "upcoming"
+                        : ts > os
+                          ? "won"
+                          : ts < os
+                            ? "lost"
+                            : m.pens
+                              ? isA
+                                ? "won"
+                                : "lost"
+                              : "draw";
+                    const rc =
+                      result === "won"
+                        ? "bg-[var(--green)]"
+                        : result === "lost"
+                          ? "bg-[var(--maroon)]"
+                          : result === "draw"
+                            ? "bg-[var(--muted)]"
+                            : "bg-[var(--gold)]";
+                    const rl = result === "won" ? "W" : result === "lost" ? "L" : result === "draw" ? "D" : "•";
+                    return (
+                      <li key={i} className="flex items-center gap-2 py-2">
+                        <span className="w-9 shrink-0 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                          {shortStage(m.stage)}
+                        </span>
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white ${rc}`}>
+                          {rl}
+                        </span>
+                        <span className="shrink-0 tabular-nums text-sm font-extrabold text-[var(--navy)]">
+                          {ts == null || os == null ? "vs" : `${ts}–${os}`}
+                        </span>
+                        {oppTeam && <Flag code={oppTeam.flag} name={opp} className="h-4 w-6 shrink-0" />}
+                        <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-[var(--navy)]">
+                          {opp}
+                          {m.pens ? <span className="text-[10px] font-normal text-[var(--muted)]"> ({m.pens})</span> : null}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
-                <p className="text-sm text-[var(--muted)]">Did not reach the Round of 16.</p>
+                <p className="text-sm text-[var(--muted)]">No matches found.</p>
               )}
 
               {detail.host && HOST_STADIUMS[detail.name] && (
@@ -328,7 +344,7 @@ function TeamCell({
   const t = BY_NAME[name];
   return (
     <div
-      className={`flex items-center gap-2.5 rounded-md px-2 py-2 ${
+      className={`flex items-center gap-1 rounded-md px-1 py-1.5 sm:gap-2.5 sm:px-2 sm:py-2 ${
         divider ? "border-b border-[var(--border)]" : ""
       } ${state === "win" ? "bg-[rgba(42,157,63,0.12)]" : ""}`}
     >
@@ -336,11 +352,11 @@ function TeamCell({
         <Flag
           code={t.flag}
           name={t.name}
-          className={`h-7 w-10 shrink-0 ${state === "lose" ? "opacity-45" : ""}`}
+          className={`h-4 w-6 shrink-0 sm:h-7 sm:w-10 ${state === "lose" ? "opacity-45" : ""}`}
         />
       )}
       <span
-        className={`truncate text-sm ${
+        className={`hidden truncate sm:inline sm:text-sm ${
           state === "win"
             ? "font-extrabold text-[var(--navy)]"
             : state === "lose"
@@ -350,7 +366,7 @@ function TeamCell({
       >
         {t ? t.name : name}
       </span>
-      {state === "win" && <span className="ml-auto text-sm font-bold text-[var(--green)]">✓</span>}
+      {state === "win" && <span className="ml-auto text-xs font-bold text-[var(--green)] sm:text-sm">✓</span>}
     </div>
   );
 }
@@ -363,18 +379,21 @@ function cellState(m: Match, side: "a" | "b"): "win" | "lose" | "tbd" {
 function BracketView() {
   return (
     <div>
-      <div className="overflow-x-auto pb-2">
-        <div className="flex min-w-[1050px] gap-3">
+      <div className="overflow-hidden pb-2 sm:overflow-x-auto">
+        <div className="flex min-w-0 gap-0.5 sm:min-w-[1050px] sm:gap-3">
           {KO_ROUNDS.map((round) => (
             <div key={round.name} className="flex flex-1 flex-col">
-              <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--navy)]">
-                {round.name}
+              <h4 className="mb-2 text-center text-[9px] font-bold uppercase tracking-[0.06em] text-[var(--navy)] sm:mb-3 sm:text-[11px] sm:tracking-[0.14em]">
+                <span className="sm:hidden">
+                  {round.name === "Round of 16" ? "R16" : round.name === "Quarter-finals" ? "QF" : round.name === "Semi-finals" ? "SF" : round.name}
+                </span>
+                <span className="hidden sm:inline">{round.name}</span>
               </h4>
               <div className="flex flex-1 flex-col justify-around gap-2">
                 {round.matches.map((m, k) => (
                   <div
                     key={k}
-                    className="rounded-lg border border-[var(--border)] bg-white px-1.5 py-1 shadow-sm"
+                    className="rounded-md border border-[var(--border)] bg-white px-0.5 py-0.5 shadow-sm sm:rounded-lg sm:px-1.5 sm:py-1"
                   >
                     <TeamCell name={m.a} state={cellState(m, "a")} divider />
                     <TeamCell name={m.b} state={cellState(m, "b")} divider={false} />
@@ -386,28 +405,36 @@ function BracketView() {
 
           {/* Final */}
           <div className="flex flex-1 flex-col">
-            <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--navy)]">
-              Final
+            <h4 className="mb-2 text-center text-[9px] font-bold uppercase tracking-[0.06em] text-[var(--navy)] sm:mb-3 sm:text-[11px] sm:tracking-[0.14em]">
+              <span className="sm:hidden">F</span>
+              <span className="hidden sm:inline">Final</span>
             </h4>
             <div className="flex flex-1 flex-col justify-center">
-              <div className="rounded-lg border border-[var(--border)] bg-white px-2 py-2 text-center shadow-sm">
-                <p className="text-[11px] font-semibold text-[var(--navy)]">Winner SF1</p>
-                <p className="my-1 text-[10px] text-[var(--muted)]">vs</p>
-                <p className="text-[11px] font-semibold text-[var(--navy)]">Winner SF2</p>
-                <p className="mt-2 text-[10px] text-[var(--muted)]">July 19</p>
+              <div className="rounded-md border border-[var(--border)] bg-white px-1 py-2 text-center shadow-sm sm:rounded-lg sm:px-2">
+                <p className="text-[9px] font-semibold text-[var(--navy)] sm:text-[11px]">
+                  <span className="sm:hidden">SF1</span>
+                  <span className="hidden sm:inline">Winner SF1</span>
+                </p>
+                <p className="my-1 text-[9px] text-[var(--muted)] sm:text-[10px]">vs</p>
+                <p className="text-[9px] font-semibold text-[var(--navy)] sm:text-[11px]">
+                  <span className="sm:hidden">SF2</span>
+                  <span className="hidden sm:inline">Winner SF2</span>
+                </p>
+                <p className="mt-2 text-[9px] text-[var(--muted)] sm:text-[10px]">July 19</p>
               </div>
             </div>
           </div>
 
           {/* Champion */}
-          <div className="flex flex-col justify-center">
-            <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--gold)]">
-              Champion
+          <div className="hidden flex-col justify-center sm:flex">
+            <h4 className="mb-2 text-center text-[9px] font-bold uppercase tracking-[0.06em] text-[var(--gold)] sm:mb-3 sm:text-[11px] sm:tracking-[0.14em]">
+              <span className="sm:hidden">CH</span>
+              <span className="hidden sm:inline">Champion</span>
             </h4>
-            <div className="grid place-items-center rounded-xl border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-5 py-6">
-              <Logo className="h-16 w-auto" />
-              <span className="mt-2 text-center text-lg font-extrabold text-[var(--navy)]">TBD</span>
-              <span className="text-[11px] text-[var(--muted)]">Crowned July 19</span>
+            <div className="grid place-items-center rounded-lg border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-1.5 py-3 sm:rounded-xl sm:px-5 sm:py-6">
+              <Logo className="h-10 w-auto sm:h-16" />
+              <span className="mt-1 text-center text-sm font-extrabold text-[var(--navy)] sm:mt-2 sm:text-lg">TBD</span>
+              <span className="hidden text-[11px] text-[var(--muted)] sm:block">Crowned July 19</span>
             </div>
           </div>
         </div>
@@ -422,20 +449,21 @@ export default function WorldCupViews() {
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3">
-        <div className="flex items-center gap-3">
-          <Logo className="h-12 w-auto shrink-0 sm:h-14" />
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
+        <div className="flex items-center gap-2.5">
+          <Logo className="h-10 w-auto shrink-0 sm:h-14" />
           <div>
-            <h1 className="text-xl font-extrabold leading-none tracking-tight text-[var(--navy)] sm:text-2xl">
+            <h1 className="text-lg font-extrabold leading-none tracking-tight text-[var(--navy)] sm:text-2xl">
               World Cup 2026
             </h1>
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+            <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)] sm:text-[10px]">
               48 Nations
             </p>
           </div>
+          <ThemeSong />
         </div>
 
-        <nav className="flex flex-wrap gap-1.5">
+        <nav className="flex flex-nowrap gap-1 overflow-x-auto">
           {TABS.map((tab) => {
             const active = view === tab.id;
             return (
@@ -443,7 +471,7 @@ export default function WorldCupViews() {
                 key={tab.id}
                 type="button"
                 onClick={() => setView(tab.id)}
-                className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition-colors ${
+                className={`shrink-0 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] transition-colors sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.06em] ${
                   active
                     ? "border-[var(--navy)] bg-[var(--navy)] text-white"
                     : "border-[var(--border)] bg-white text-[var(--navy)] hover:border-[var(--navy)]"
@@ -453,7 +481,6 @@ export default function WorldCupViews() {
               </button>
             );
           })}
-          <ThemeSong />
         </nav>
       </header>
 

@@ -192,6 +192,133 @@ export const HOST_STADIUMS: Record<string, { city: string; stadium: string }[]> 
   ],
 };
 
+// Every match (group stage + knockouts) with real scores. Semi-finals not yet played.
+export type MatchRow = { stage: string; a: string; b: string; sa: number | null; sb: number | null; pens?: string };
+export const MATCHES: MatchRow[] = [
+  // Group A
+  { stage: "Group A", a: "Mexico", b: "South Africa", sa: 2, sb: 0 },
+  { stage: "Group A", a: "South Korea", b: "Czechia", sa: 2, sb: 1 },
+  { stage: "Group A", a: "Czechia", b: "South Africa", sa: 1, sb: 1 },
+  { stage: "Group A", a: "Mexico", b: "South Korea", sa: 1, sb: 0 },
+  { stage: "Group A", a: "Mexico", b: "Czechia", sa: 3, sb: 0 },
+  { stage: "Group A", a: "South Africa", b: "South Korea", sa: 1, sb: 0 },
+  // Group B
+  { stage: "Group B", a: "Canada", b: "Bosnia & Herzegovina", sa: 1, sb: 1 },
+  { stage: "Group B", a: "Switzerland", b: "Qatar", sa: 1, sb: 1 },
+  { stage: "Group B", a: "Switzerland", b: "Bosnia & Herzegovina", sa: 4, sb: 1 },
+  { stage: "Group B", a: "Canada", b: "Qatar", sa: 6, sb: 0 },
+  { stage: "Group B", a: "Switzerland", b: "Canada", sa: 2, sb: 1 },
+  { stage: "Group B", a: "Bosnia & Herzegovina", b: "Qatar", sa: 3, sb: 1 },
+  // Group C
+  { stage: "Group C", a: "Brazil", b: "Morocco", sa: 1, sb: 1 },
+  { stage: "Group C", a: "Scotland", b: "Haiti", sa: 1, sb: 0 },
+  { stage: "Group C", a: "Scotland", b: "Morocco", sa: 0, sb: 1 },
+  { stage: "Group C", a: "Brazil", b: "Haiti", sa: 3, sb: 0 },
+  { stage: "Group C", a: "Brazil", b: "Scotland", sa: 3, sb: 0 },
+  { stage: "Group C", a: "Morocco", b: "Haiti", sa: 4, sb: 2 },
+  // Group D
+  { stage: "Group D", a: "United States", b: "Paraguay", sa: 4, sb: 1 },
+  { stage: "Group D", a: "Australia", b: "Türkiye", sa: 2, sb: 0 },
+  { stage: "Group D", a: "United States", b: "Australia", sa: 2, sb: 0 },
+  { stage: "Group D", a: "Türkiye", b: "Paraguay", sa: 0, sb: 1 },
+  { stage: "Group D", a: "Türkiye", b: "United States", sa: 3, sb: 2 },
+  { stage: "Group D", a: "Paraguay", b: "Australia", sa: 0, sb: 0 },
+  // Group E
+  { stage: "Group E", a: "Germany", b: "Curaçao", sa: 7, sb: 1 },
+  { stage: "Group E", a: "Côte d'Ivoire", b: "Ecuador", sa: 1, sb: 0 },
+  { stage: "Group E", a: "Germany", b: "Côte d'Ivoire", sa: 2, sb: 1 },
+  { stage: "Group E", a: "Ecuador", b: "Curaçao", sa: 0, sb: 0 },
+  { stage: "Group E", a: "Côte d'Ivoire", b: "Curaçao", sa: 2, sb: 0 },
+  { stage: "Group E", a: "Ecuador", b: "Germany", sa: 2, sb: 1 },
+  // Group F
+  { stage: "Group F", a: "Netherlands", b: "Japan", sa: 2, sb: 2 },
+  { stage: "Group F", a: "Sweden", b: "Tunisia", sa: 5, sb: 1 },
+  { stage: "Group F", a: "Netherlands", b: "Sweden", sa: 5, sb: 1 },
+  { stage: "Group F", a: "Japan", b: "Tunisia", sa: 4, sb: 0 },
+  { stage: "Group F", a: "Japan", b: "Sweden", sa: 1, sb: 1 },
+  { stage: "Group F", a: "Netherlands", b: "Tunisia", sa: 3, sb: 1 },
+  // Group G
+  { stage: "Group G", a: "Belgium", b: "Egypt", sa: 1, sb: 1 },
+  { stage: "Group G", a: "Iran", b: "New Zealand", sa: 2, sb: 2 },
+  { stage: "Group G", a: "Belgium", b: "Iran", sa: 0, sb: 0 },
+  { stage: "Group G", a: "New Zealand", b: "Egypt", sa: 1, sb: 3 },
+  { stage: "Group G", a: "Egypt", b: "Iran", sa: 1, sb: 1 },
+  { stage: "Group G", a: "New Zealand", b: "Belgium", sa: 1, sb: 5 },
+  // Group H
+  { stage: "Group H", a: "Spain", b: "Cabo Verde", sa: 0, sb: 0 },
+  { stage: "Group H", a: "Saudi Arabia", b: "Uruguay", sa: 1, sb: 1 },
+  { stage: "Group H", a: "Spain", b: "Saudi Arabia", sa: 4, sb: 0 },
+  { stage: "Group H", a: "Uruguay", b: "Cabo Verde", sa: 2, sb: 2 },
+  { stage: "Group H", a: "Cabo Verde", b: "Saudi Arabia", sa: 0, sb: 0 },
+  { stage: "Group H", a: "Uruguay", b: "Spain", sa: 0, sb: 1 },
+  // Group I
+  { stage: "Group I", a: "France", b: "Senegal", sa: 3, sb: 1 },
+  { stage: "Group I", a: "Iraq", b: "Norway", sa: 1, sb: 4 },
+  { stage: "Group I", a: "France", b: "Iraq", sa: 3, sb: 0 },
+  { stage: "Group I", a: "Norway", b: "Senegal", sa: 3, sb: 2 },
+  { stage: "Group I", a: "Norway", b: "France", sa: 1, sb: 4 },
+  { stage: "Group I", a: "Senegal", b: "Iraq", sa: 5, sb: 0 },
+  // Group J
+  { stage: "Group J", a: "Argentina", b: "Algeria", sa: 3, sb: 0 },
+  { stage: "Group J", a: "Austria", b: "Jordan", sa: 3, sb: 1 },
+  { stage: "Group J", a: "Argentina", b: "Austria", sa: 2, sb: 0 },
+  { stage: "Group J", a: "Jordan", b: "Algeria", sa: 1, sb: 2 },
+  { stage: "Group J", a: "Algeria", b: "Austria", sa: 3, sb: 3 },
+  { stage: "Group J", a: "Jordan", b: "Argentina", sa: 1, sb: 3 },
+  // Group K
+  { stage: "Group K", a: "Portugal", b: "DR Congo", sa: 1, sb: 1 },
+  { stage: "Group K", a: "Uzbekistan", b: "Colombia", sa: 1, sb: 3 },
+  { stage: "Group K", a: "Portugal", b: "Uzbekistan", sa: 5, sb: 0 },
+  { stage: "Group K", a: "Colombia", b: "DR Congo", sa: 1, sb: 0 },
+  { stage: "Group K", a: "Colombia", b: "Portugal", sa: 0, sb: 0 },
+  { stage: "Group K", a: "DR Congo", b: "Uzbekistan", sa: 3, sb: 1 },
+  // Group L
+  { stage: "Group L", a: "England", b: "Croatia", sa: 4, sb: 2 },
+  { stage: "Group L", a: "Ghana", b: "Panama", sa: 1, sb: 0 },
+  { stage: "Group L", a: "England", b: "Ghana", sa: 0, sb: 0 },
+  { stage: "Group L", a: "Panama", b: "Croatia", sa: 0, sb: 1 },
+  { stage: "Group L", a: "England", b: "Panama", sa: 2, sb: 0 },
+  { stage: "Group L", a: "Croatia", b: "Ghana", sa: 2, sb: 1 },
+  // Round of 32
+  { stage: "Round of 32", a: "Canada", b: "South Africa", sa: 1, sb: 0 },
+  { stage: "Round of 32", a: "Brazil", b: "Japan", sa: 2, sb: 1 },
+  { stage: "Round of 32", a: "Paraguay", b: "Germany", sa: 1, sb: 1, pens: "4-3 pens" },
+  { stage: "Round of 32", a: "Morocco", b: "Netherlands", sa: 1, sb: 1, pens: "3-2 pens" },
+  { stage: "Round of 32", a: "Norway", b: "Côte d'Ivoire", sa: 2, sb: 1 },
+  { stage: "Round of 32", a: "France", b: "Sweden", sa: 3, sb: 0 },
+  { stage: "Round of 32", a: "Mexico", b: "Ecuador", sa: 2, sb: 0 },
+  { stage: "Round of 32", a: "England", b: "DR Congo", sa: 2, sb: 1 },
+  { stage: "Round of 32", a: "Belgium", b: "Senegal", sa: 3, sb: 2 },
+  { stage: "Round of 32", a: "United States", b: "Bosnia & Herzegovina", sa: 2, sb: 0 },
+  { stage: "Round of 32", a: "Spain", b: "Austria", sa: 3, sb: 0 },
+  { stage: "Round of 32", a: "Portugal", b: "Croatia", sa: 2, sb: 1 },
+  { stage: "Round of 32", a: "Switzerland", b: "Algeria", sa: 2, sb: 0 },
+  { stage: "Round of 32", a: "Egypt", b: "Australia", sa: 1, sb: 1, pens: "4-2 pens" },
+  { stage: "Round of 32", a: "Argentina", b: "Cabo Verde", sa: 3, sb: 2 },
+  { stage: "Round of 32", a: "Colombia", b: "Ghana", sa: 1, sb: 0 },
+  // Round of 16
+  { stage: "Round of 16", a: "Morocco", b: "Canada", sa: 3, sb: 0 },
+  { stage: "Round of 16", a: "France", b: "Paraguay", sa: 1, sb: 0 },
+  { stage: "Round of 16", a: "Norway", b: "Brazil", sa: 2, sb: 1 },
+  { stage: "Round of 16", a: "England", b: "Mexico", sa: 3, sb: 2 },
+  { stage: "Round of 16", a: "Spain", b: "Portugal", sa: 1, sb: 0 },
+  { stage: "Round of 16", a: "Belgium", b: "United States", sa: 4, sb: 1 },
+  { stage: "Round of 16", a: "Switzerland", b: "Colombia", sa: 0, sb: 0, pens: "4-3 pens" },
+  { stage: "Round of 16", a: "Argentina", b: "Egypt", sa: 3, sb: 2 },
+  // Quarter-finals
+  { stage: "Quarter-final", a: "France", b: "Morocco", sa: 2, sb: 0 },
+  { stage: "Quarter-final", a: "Spain", b: "Belgium", sa: 2, sb: 1 },
+  { stage: "Quarter-final", a: "England", b: "Norway", sa: 2, sb: 1 },
+  { stage: "Quarter-final", a: "Argentina", b: "Switzerland", sa: 3, sb: 1 },
+  // Semi-finals (not played yet)
+  { stage: "Semi-final", a: "France", b: "Spain", sa: null, sb: null },
+  { stage: "Semi-final", a: "England", b: "Argentina", sa: null, sb: null },
+];
+
+export function matchesFor(name: string): MatchRow[] {
+  return MATCHES.filter((m) => m.a === name || m.b === name);
+}
+
 export function teamsByGroup(letter: string): Team[] {
   return TEAMS.filter((t) => t.group === letter);
 }
