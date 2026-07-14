@@ -101,93 +101,138 @@ function GroupsView() {
   );
 }
 
-/* ---------- Bracket (projected R32 with real flags) ---------- */
-// seed like "1A" (winner A), "2E" (runner-up E), "3C" (3rd of C) -> projected team
-function seedTeam(seed: string) {
-  const m = /^([123])([A-L])$/.exec(seed);
-  if (!m) return null;
-  return teamsByGroup(m[2])[Number(m[1]) - 1] ?? null;
-}
+/* ---------- Bracket (real results through the semi-finals) ---------- */
+const BY_NAME: Record<string, (typeof TEAMS)[number]> = TEAMS.reduce(
+  (a, t) => ((a[t.name] = t), a),
+  {} as Record<string, (typeof TEAMS)[number]>
+);
 
-// valid 32-team partition: 12 winners + 12 runners-up + 8 best thirds
-const R32_PAIRS: [string, string][] = [
-  ["1A", "2B"], ["1C", "2D"], ["1E", "2F"], ["1G", "2H"],
-  ["1I", "2J"], ["1K", "2L"], ["1B", "2A"], ["1D", "2C"],
-  ["1F", "2E"], ["1H", "2G"], ["1J", "2I"], ["1L", "2K"],
-  ["3A", "3C"], ["3B", "3D"], ["3E", "3G"], ["3F", "3H"],
+type Match = { a: string; b: string; win?: "a" | "b" };
+
+// Actual knockout results (as of July 14, 2026). Semis are set; final is July 19.
+const KO_ROUNDS: { name: string; matches: Match[] }[] = [
+  {
+    name: "Round of 16",
+    matches: [
+      { a: "France", b: "Paraguay", win: "a" },
+      { a: "Morocco", b: "Canada", win: "a" },
+      { a: "Spain", b: "Austria", win: "a" },
+      { a: "Belgium", b: "United States", win: "a" },
+      { a: "England", b: "Mexico", win: "a" },
+      { a: "Norway", b: "Brazil", win: "a" },
+      { a: "Argentina", b: "Egypt", win: "a" },
+      { a: "Switzerland", b: "Algeria", win: "a" },
+    ],
+  },
+  {
+    name: "Quarter-finals",
+    matches: [
+      { a: "France", b: "Morocco", win: "a" },
+      { a: "Spain", b: "Belgium", win: "a" },
+      { a: "England", b: "Norway", win: "a" },
+      { a: "Argentina", b: "Switzerland", win: "a" },
+    ],
+  },
+  {
+    name: "Semi-finals",
+    matches: [
+      { a: "France", b: "Spain" },
+      { a: "England", b: "Argentina" },
+    ],
+  },
 ];
 
-const ROUNDS = [
-  { name: "Round of 32", count: 16, start: 1, prevStart: 0 },
-  { name: "Round of 16", count: 8, start: 17, prevStart: 1 },
-  { name: "Quarters", count: 4, start: 25, prevStart: 17 },
-  { name: "Semis", count: 2, start: 29, prevStart: 25 },
-  { name: "Final", count: 1, start: 31, prevStart: 29 },
-];
-
-function TeamRow({ seed, divider }: { seed: string; divider: boolean }) {
-  const t = seedTeam(seed);
-  const m = /^([123])([A-L])$/.exec(seed);
-  const color = m ? GROUP_ACCENTS[m[2]] : "var(--border)";
+function TeamCell({
+  name,
+  state,
+  divider,
+}: {
+  name: string;
+  state: "win" | "lose" | "tbd";
+  divider: boolean;
+}) {
+  const t = BY_NAME[name];
   return (
-    <div className={`flex items-center gap-1.5 py-1 ${divider ? "border-b border-[var(--border)]" : ""}`}>
-      <span className="h-4 w-1 shrink-0 rounded" style={{ background: color }} />
-      {t ? (
-        <>
-          <Flag code={t.flag} name={t.name} className="h-4 w-6 shrink-0" />
-          <span className="truncate text-[11px] font-semibold text-[var(--navy)]">{t.name}</span>
-        </>
-      ) : (
-        <span className="text-[11px] text-[var(--muted)]">{seed}</span>
+    <div
+      className={`flex items-center gap-1.5 rounded px-1 py-1 ${
+        divider ? "border-b border-[var(--border)]" : ""
+      } ${state === "win" ? "bg-[rgba(42,157,63,0.12)]" : ""}`}
+    >
+      {t && (
+        <Flag
+          code={t.flag}
+          name={t.name}
+          className={`h-4 w-6 shrink-0 ${state === "lose" ? "opacity-45" : ""}`}
+        />
       )}
+      <span
+        className={`truncate text-[11px] ${
+          state === "win"
+            ? "font-extrabold text-[var(--navy)]"
+            : state === "lose"
+              ? "font-medium text-[var(--muted)] line-through"
+              : "font-semibold text-[var(--navy)]"
+        }`}
+      >
+        {t ? t.name : name}
+      </span>
+      {state === "win" && <span className="ml-auto text-[10px] text-[var(--green)]">✓</span>}
     </div>
   );
+}
+
+function cellState(m: Match, side: "a" | "b"): "win" | "lose" | "tbd" {
+  if (!m.win) return "tbd";
+  return m.win === side ? "win" : "lose";
 }
 
 function BracketView() {
   return (
     <div>
       <p className="mb-5 max-w-2xl text-sm text-[var(--muted)]">
-        Projected Round of 32 - each group&apos;s top two (plus the 8 best third-placed
-        teams) by seeding, so you can see who could meet who. Real matchups confirm once
-        the group games are played; later rounds fill in as teams win.
+        Live knockout bracket - real results through the quarter-finals. The semi-finals
+        are set:{" "}
+        <span className="font-semibold text-[var(--navy)]">France v Spain</span> and{" "}
+        <span className="font-semibold text-[var(--navy)]">England v Argentina</span>. The
+        Final is July 19 at MetLife Stadium.
       </p>
       <div className="overflow-x-auto pb-4">
-        <div className="flex min-w-[1120px] gap-3">
-          {ROUNDS.map((round, ri) => (
-            <div key={round.name} className={`flex flex-col ${ri === 0 ? "w-52 shrink-0" : "flex-1"}`}>
+        <div className="flex min-w-[1050px] gap-3">
+          {KO_ROUNDS.map((round) => (
+            <div key={round.name} className="flex flex-1 flex-col">
               <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--navy)]">
                 {round.name}
               </h4>
               <div className="flex flex-1 flex-col justify-around gap-2">
-                {Array.from({ length: round.count }).map((_, k) => (
+                {round.matches.map((m, k) => (
                   <div
                     key={k}
-                    className="rounded-lg border border-[var(--border)] bg-white px-2 py-1 shadow-sm"
+                    className="rounded-lg border border-[var(--border)] bg-white px-1.5 py-1 shadow-sm"
                   >
-                    {ri === 0 ? (
-                      <>
-                        <TeamRow seed={R32_PAIRS[k][0]} divider />
-                        <TeamRow seed={R32_PAIRS[k][1]} divider={false} />
-                      </>
-                    ) : (
-                      [0, 1].map((slot) => (
-                        <div
-                          key={slot}
-                          className={`py-1 text-[11px] font-medium text-[var(--muted)] ${
-                            slot === 0 ? "border-b border-[var(--border)]" : ""
-                          }`}
-                        >
-                          Winner M{round.prevStart + 2 * k + slot}
-                        </div>
-                      ))
-                    )}
+                    <TeamCell name={m.a} state={cellState(m, "a")} divider />
+                    <TeamCell name={m.b} state={cellState(m, "b")} divider={false} />
                   </div>
                 ))}
               </div>
             </div>
           ))}
 
+          {/* Final */}
+          <div className="flex flex-1 flex-col">
+            <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--navy)]">
+              Final
+            </h4>
+            <div className="flex flex-1 flex-col justify-center">
+              <div className="rounded-lg border border-[var(--border)] bg-white px-2 py-2 text-center shadow-sm">
+                <p className="text-[11px] font-semibold text-[var(--navy)]">Winner SF1</p>
+                <p className="my-1 text-[10px] text-[var(--muted)]">vs</p>
+                <p className="text-[11px] font-semibold text-[var(--navy)]">Winner SF2</p>
+                <p className="mt-2 text-[10px] text-[var(--muted)]">July 19</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Champion */}
           <div className="flex flex-col justify-center">
             <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--gold)]">
               Champion
@@ -199,8 +244,8 @@ function BracketView() {
                 <path fill="var(--gold)" d="M30 166h60l-6 16H36z" />
                 <rect x="26" y="182" width="68" height="8" rx="3" fill="var(--gold)" />
               </svg>
-              <span className="mt-2 text-center text-lg font-extrabold text-[var(--navy)]">Lifted July 19</span>
-              <span className="text-[11px] text-[var(--muted)]">MetLife Stadium</span>
+              <span className="mt-2 text-center text-lg font-extrabold text-[var(--navy)]">TBD</span>
+              <span className="text-[11px] text-[var(--muted)]">Crowned July 19</span>
             </div>
           </div>
         </div>
