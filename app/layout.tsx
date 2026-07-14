@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Outfit } from "next/font/google";
 import "./globals.css";
+import FloatingBall from "./components/FloatingBall";
 
 const anton = Anton({
   variable: "--font-display",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
+        <FloatingBall />
       </body>
     </html>
   );

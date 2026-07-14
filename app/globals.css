@@ -89,3 +89,13 @@ body {
     opacity: 1;
   }
 }
+
+/* Floating ball idle bob (plays only when the ball is at rest) */
+@keyframes ballBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.ball-idle { animation: ballBob 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ball-idle { animation: none; }
+}
