@@ -66,7 +66,7 @@ function FlagsView() {
 /* ---------- Groups ---------- */
 function GroupsView() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {GROUP_LETTERS.map((letter) => {
         const accent = GROUP_ACCENTS[letter];
         return (
@@ -101,31 +101,20 @@ function GroupsView() {
   );
 }
 
-/* ---------- Bracket (filled with group-position seeds) ---------- */
-function SeedChip({ seed }: { seed: string }) {
-  const m = /^([12])([A-L])$/.exec(seed);
-  if (m) {
-    return (
-      <span
-        className="inline-block rounded px-2 py-0.5 text-[11px] font-bold text-white"
-        style={{ background: GROUP_ACCENTS[m[2]] }}
-      >
-        {seed}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-block rounded bg-[var(--bg-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--muted)]">
-      {seed}
-    </span>
-  );
+/* ---------- Bracket (projected R32 with real flags) ---------- */
+// seed like "1A" (winner A), "2E" (runner-up E), "3C" (3rd of C) -> projected team
+function seedTeam(seed: string) {
+  const m = /^([123])([A-L])$/.exec(seed);
+  if (!m) return null;
+  return teamsByGroup(m[2])[Number(m[1]) - 1] ?? null;
 }
 
+// valid 32-team partition: 12 winners + 12 runners-up + 8 best thirds
 const R32_PAIRS: [string, string][] = [
-  ["1A", "2E"], ["1B", "2F"], ["1C", "2G"], ["1D", "2H"],
-  ["1E", "2A"], ["1F", "2B"], ["1G", "2C"], ["1H", "2D"],
-  ["1I", "2K"], ["1J", "2L"], ["1K", "2I"], ["1L", "2J"],
-  ["2A", "3rd"], ["2B", "3rd"], ["2C", "3rd"], ["2D", "3rd"],
+  ["1A", "2B"], ["1C", "2D"], ["1E", "2F"], ["1G", "2H"],
+  ["1I", "2J"], ["1K", "2L"], ["1B", "2A"], ["1D", "2C"],
+  ["1F", "2E"], ["1H", "2G"], ["1J", "2I"], ["1L", "2K"],
+  ["3A", "3C"], ["3B", "3D"], ["3E", "3G"], ["3F", "3H"],
 ];
 
 const ROUNDS = [
@@ -136,47 +125,65 @@ const ROUNDS = [
   { name: "Final", count: 1, start: 31, prevStart: 29 },
 ];
 
+function TeamRow({ seed, divider }: { seed: string; divider: boolean }) {
+  const t = seedTeam(seed);
+  const m = /^([123])([A-L])$/.exec(seed);
+  const color = m ? GROUP_ACCENTS[m[2]] : "var(--border)";
+  return (
+    <div className={`flex items-center gap-1.5 py-1 ${divider ? "border-b border-[var(--border)]" : ""}`}>
+      <span className="h-4 w-1 shrink-0 rounded" style={{ background: color }} />
+      {t ? (
+        <>
+          <Flag code={t.flag} name={t.name} className="h-4 w-6 shrink-0" />
+          <span className="truncate text-[11px] font-semibold text-[var(--navy)]">{t.name}</span>
+        </>
+      ) : (
+        <span className="text-[11px] text-[var(--muted)]">{seed}</span>
+      )}
+    </div>
+  );
+}
+
 function BracketView() {
   return (
     <div>
       <p className="mb-5 max-w-2xl text-sm text-[var(--muted)]">
-        The path to the Final. Round of 32 slots show each group&apos;s finishing
-        position (1A = winner of Group A, 2E = runner-up of Group E) plus the 8 best
-        third-placed teams. Real names lock in once the groups finish.
+        Projected Round of 32 - each group&apos;s top two (plus the 8 best third-placed
+        teams) by seeding, so you can see who could meet who. Real matchups confirm once
+        the group games are played; later rounds fill in as teams win.
       </p>
       <div className="overflow-x-auto pb-4">
-        <div className="flex min-w-[900px] gap-4">
+        <div className="flex min-w-[1120px] gap-3">
           {ROUNDS.map((round, ri) => (
-            <div key={round.name} className="flex flex-1 flex-col">
+            <div key={round.name} className={`flex flex-col ${ri === 0 ? "w-52 shrink-0" : "flex-1"}`}>
               <h4 className="mb-3 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--navy)]">
                 {round.name}
               </h4>
-              <div className="flex flex-1 flex-col justify-around gap-2.5">
-                {Array.from({ length: round.count }).map((_, k) => {
-                  const top = ri === 0 ? R32_PAIRS[k][0] : `W M${round.prevStart + 2 * k}`;
-                  const bottom = ri === 0 ? R32_PAIRS[k][1] : `W M${round.prevStart + 2 * k + 1}`;
-                  return (
-                    <div
-                      key={k}
-                      className="rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 shadow-sm"
-                    >
-                      {[top, bottom].map((s, idx) => (
+              <div className="flex flex-1 flex-col justify-around gap-2">
+                {Array.from({ length: round.count }).map((_, k) => (
+                  <div
+                    key={k}
+                    className="rounded-lg border border-[var(--border)] bg-white px-2 py-1 shadow-sm"
+                  >
+                    {ri === 0 ? (
+                      <>
+                        <TeamRow seed={R32_PAIRS[k][0]} divider />
+                        <TeamRow seed={R32_PAIRS[k][1]} divider={false} />
+                      </>
+                    ) : (
+                      [0, 1].map((slot) => (
                         <div
-                          key={idx}
-                          className={`flex items-center py-1 ${
-                            idx === 0 ? "border-b border-[var(--border)]" : ""
+                          key={slot}
+                          className={`py-1 text-[11px] font-medium text-[var(--muted)] ${
+                            slot === 0 ? "border-b border-[var(--border)]" : ""
                           }`}
                         >
-                          {ri === 0 ? (
-                            <SeedChip seed={s} />
-                          ) : (
-                            <span className="text-[11px] font-medium text-[var(--muted)]">{s}</span>
-                          )}
+                          Winner M{round.prevStart + 2 * k + slot}
                         </div>
-                      ))}
-                    </div>
-                  );
-                })}
+                      ))
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           ))}

@@ -112,8 +112,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const isGlobe = mode === "globe";
   const W = isGlobe ? GLOBE : FLAT_W;
   const H = isGlobe ? GLOBE : FLAT_H;
-  const sea = isGlobe ? "url(#ocean)" : "#eaf1fb";
-  const landOff = isGlobe ? "#2b2f38" : "#cdd6e2";
+  const sea = isGlobe ? "url(#ocean)" : "#161821";
+  const landOff = "#2b2f38";
 
   const qualified = features.filter((f) => QUALIFIED.has(f.properties.a3));
   const others = features.filter((f) => !QUALIFIED.has(f.properties.a3));
@@ -122,7 +122,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       <div className="flex-1">
-        <div className={`mx-auto w-full ${isGlobe ? "max-w-[540px]" : "max-w-[960px]"}`}>
+        <div className={`mx-auto w-full ${isGlobe ? "max-w-[540px]" : "max-w-[960px] overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className={`w-full touch-none select-none ${
@@ -149,14 +149,14 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             {isGlobe ? (
               <circle cx={W / 2} cy={H / 2} r={GLOBE / 2 - 6} fill={sea} />
             ) : (
-              <path d={sphere} fill={sea} stroke="#d5deea" strokeWidth={1} />
+              <path d={sphere} fill={sea} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
             )}
-            <path d={graticule} fill="none" stroke={isGlobe ? "rgba(255,255,255,0.1)" : "#c6d3e6"} strokeWidth={0.5} />
+            <path d={graticule} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={0.5} />
 
             <g>
               {others.map((f, i) => {
                 const d = path(f as never);
-                return d ? <path key={i} d={d} fill={landOff} stroke={isGlobe ? "rgba(255,255,255,0.06)" : "#ffffff"} strokeWidth={0.4} /> : null;
+                return d ? <path key={i} d={d} fill={landOff} stroke="rgba(255,255,255,0.06)" strokeWidth={0.4} /> : null;
               })}
             </g>
 
