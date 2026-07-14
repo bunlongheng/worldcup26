@@ -141,6 +141,10 @@ export default function WorldMap({ mode }: { mode: Mode }) {
     selectedGroup
       ? GROUP_ACCENTS[selectedGroup]
       : GROUP_ACCENTS[BY_ISO3[a3]?.[0]?.group] || "#2fa84f";
+  // which group letters to highlight in the legend (a selected country lights its group)
+  const activeGroups = new Set<string>();
+  if (selectedGroup) activeGroups.add(selectedGroup);
+  else if (selected) (BY_ISO3[selected] || []).forEach((t) => activeGroups.add(t.group));
 
   return (
     <div className="flex min-h-[calc(100vh-170px)] flex-col">
@@ -307,7 +311,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               type="button"
               onClick={() => pickGroup(letter)}
               className={`rounded-md px-2.5 py-1 text-xs font-bold transition-transform hover:scale-110 ${
-                selectedGroup === letter ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
+                activeGroups.has(letter) ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
               }`}
               style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
             >
