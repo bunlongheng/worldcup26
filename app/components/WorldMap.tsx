@@ -147,9 +147,9 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   else if (selected) (BY_ISO3[selected] || []).forEach((t) => activeGroups.add(t.group));
 
   return (
-    <div className="flex min-h-[calc(100vh-170px)] w-full min-w-0 flex-col overflow-x-hidden">
+    <div className="flex w-full min-w-0 flex-col overflow-x-hidden">
       <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="min-w-0 flex-1 overflow-x-auto">
+        <div className="min-w-0 flex-1 overflow-hidden">
         <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
@@ -299,8 +299,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
       </aside>
       </div>
 
-      {/* caption + legend pinned to the bottom of the view height */}
-      <div className="mt-auto pt-8">
+      {/* caption + legend flow right after the map/panel (no forced height, no scroll) */}
+      <div className="pt-6">
         <p className="text-center text-sm text-[var(--muted)]">
           {isGlobe ? "Drag to spin. " : ""}Tap a country or a group letter - each color is a group.
         </p>
