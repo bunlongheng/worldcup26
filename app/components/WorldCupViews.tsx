@@ -271,12 +271,7 @@ function BracketView() {
               Champion
             </h4>
             <div className="grid place-items-center rounded-xl border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-5 py-6">
-              <svg viewBox="0 0 120 200" className="h-12 w-auto" aria-hidden="true">
-                <path fill="var(--gold)" d="M60 10c17 0 30 13 30 31 0 17-11 27-19 41-5 9-6 20-6 33h-10c0-13-1-24-6-33-8-14-19-24-19-41C30 23 43 10 60 10z" />
-                <rect x="52" y="120" width="16" height="22" fill="var(--gold)" />
-                <path fill="var(--gold)" d="M30 166h60l-6 16H36z" />
-                <rect x="26" y="182" width="68" height="8" rx="3" fill="var(--gold)" />
-              </svg>
+              <Logo className="h-16 w-auto" />
               <span className="mt-2 text-center text-lg font-extrabold text-[var(--navy)]">TBD</span>
               <span className="text-[11px] text-[var(--muted)]">Crowned July 19</span>
             </div>
