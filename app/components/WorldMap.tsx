@@ -6,6 +6,7 @@ import {
   geoEquirectangular,
   geoPath,
   geoGraticule10,
+  type GeoSphere,
 } from "d3-geo";
 import Flag from "./Flag";
 import CountryCard from "./CountryCard";
@@ -19,9 +20,10 @@ import {
   type Team,
 } from "../data/teams";
 
-type Feature = { properties: { a3: string }; geometry: unknown };
+type Feature = GeoJSON.Feature<GeoJSON.Geometry, { a3: string }>;
 type Mode = "flat" | "globe";
 
+const SPHERE: GeoSphere = { type: "Sphere" };
 const QUALIFIED = new Set(QUALIFIED_ISO3);
 const GLOBE = 540;
 const FLAT_W = 960;
@@ -85,13 +87,13 @@ export default function WorldMap({ mode }: { mode: Mode }) {
         [2, 2],
         [FLAT_W - 2, FLAT_H - 2],
       ],
-      { type: "Sphere" } as never
+      SPHERE
     );
   }, [mode, rot]);
 
   const path = useMemo(() => geoPath(projection), [projection]);
   const graticule = useMemo(() => path(geoGraticule10()) ?? "", [path]);
-  const sphere = useMemo(() => path({ type: "Sphere" } as never) ?? "", [path]);
+  const sphere = useMemo(() => path(SPHERE) ?? "", [path]);
 
   const onDown = (e: React.PointerEvent) => {
     moved.current = false;
@@ -194,14 +196,14 @@ export default function WorldMap({ mode }: { mode: Mode }) {
 
             <g>
               {others.map((f, i) => {
-                const d = path(f as never);
+                const d = path(f);
                 return d ? <path key={i} d={d} fill={landOff} stroke="rgba(255,255,255,0.06)" strokeWidth={0.4} /> : null;
               })}
             </g>
 
             <g filter="url(#pop)">
               {qualified.map((f, i) => {
-                const d = path(f as never);
+                const d = path(f);
                 if (!d) return null;
                 const a3 = f.properties.a3;
                 const isHover = hovered === a3;
@@ -229,7 +231,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             {qualified
               .filter((f) => activeSet.has(f.properties.a3))
               .map((f, i) => {
-                const d = path(f as never);
+                const d = path(f);
                 if (!d) return null;
                 const c = glowColor(f.properties.a3);
                 return (
