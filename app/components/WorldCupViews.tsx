@@ -105,14 +105,34 @@ function FlagsView() {
 }
 
 /* ---------- Groups ---------- */
+type KoResult = { round: string; opp: string; result: "won" | "lost" | "upcoming" };
+function teamMatches(name: string): KoResult[] {
+  const out: KoResult[] = [];
+  KO_ROUNDS.forEach((round) =>
+    round.matches.forEach((m) => {
+      if (m.a === name || m.b === name) {
+        const side = m.a === name ? "a" : "b";
+        out.push({
+          round: round.name,
+          opp: m.a === name ? m.b : m.a,
+          result: !m.win ? "upcoming" : m.win === side ? "won" : "lost",
+        });
+      }
+    })
+  );
+  return out;
+}
+
 function GroupsView() {
-  const [host, setHost] = useState<Team | null>(null);
+  const [detail, setDetail] = useState<Team | null>(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setHost(null);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDetail(null);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const results = detail ? teamMatches(detail.name) : [];
 
   return (
     <>
@@ -132,46 +152,44 @@ function GroupsView() {
                 <span className="text-base font-extrabold opacity-70">{letter}</span>
               </div>
               <ul className="divide-y divide-[var(--border)]">
-                {teamsByGroup(letter).map((t) =>
-                  t.host ? (
-                    <li key={t.name}>
-                      <button
-                        type="button"
-                        onClick={() => setHost(t)}
-                        className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--bg-2)]"
-                      >
-                        <Flag code={t.flag} name={t.name} className="h-5 w-8 shrink-0" />
-                        <span className="flex-1 text-sm font-medium text-[var(--navy)]">{t.name}</span>
+                {teamsByGroup(letter).map((t) => (
+                  <li key={t.name}>
+                    <button
+                      type="button"
+                      onClick={() => setDetail(t)}
+                      className="group flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--bg-2)]"
+                    >
+                      <Flag code={t.flag} name={t.name} className="h-5 w-8 shrink-0" />
+                      <span className="flex-1 text-sm font-medium text-[var(--navy)]">{t.name}</span>
+                      {t.host && (
                         <span className="rounded-full bg-[var(--navy)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
                           Host
                         </span>
-                      </button>
-                    </li>
-                  ) : (
-                    <li key={t.name} className="flex items-center gap-2.5 px-3 py-2">
-                      <Flag code={t.flag} name={t.name} className="h-5 w-8 shrink-0" />
-                      <span className="flex-1 text-sm font-medium text-[var(--navy)]">{t.name}</span>
-                    </li>
-                  )
-                )}
+                      )}
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-[var(--border)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--navy)]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           );
         })}
       </div>
 
-      {host && HOST_STADIUMS[host.name] && (
+      {detail && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,15,25,0.55)] p-4 backdrop-blur-md"
-          onClick={() => setHost(null)}
+          onClick={() => setDetail(null)}
         >
           <div
-            className="reveal relative flex max-h-[85vh] w-full max-w-md flex-col rounded-3xl bg-white p-7 shadow-2xl"
+            className="reveal relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white p-7 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              onClick={() => setHost(null)}
+              onClick={() => setDetail(null)}
               aria-label="Close"
               className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-colors hover:border-[var(--navy)] hover:text-[var(--navy)]"
             >
@@ -181,29 +199,80 @@ function GroupsView() {
             </button>
 
             <div className="flex flex-col items-center text-center">
-              <Flag code={host.flag} name={host.name} className="h-[86px] w-[128px]" />
-              <span className="mt-3 text-2xl font-extrabold text-[var(--navy)]">{host.name}</span>
-              <span className="mt-2 rounded-full bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-                Host · {HOST_STADIUMS[host.name].length} stadiums
-              </span>
+              <Flag code={detail.flag} name={detail.name} className="h-[86px] w-[128px]" />
+              <span className="mt-3 text-2xl font-extrabold text-[var(--navy)]">{detail.name}</span>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-bold"
+                  style={{ background: GROUP_ACCENTS[detail.group], color: textOn(GROUP_ACCENTS[detail.group]) }}
+                >
+                  Group {detail.group}
+                </span>
+                {detail.host && (
+                  <span className="rounded-full bg-[var(--navy)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                    Host nation
+                  </span>
+                )}
+              </div>
             </div>
 
-            <ul className="mt-5 divide-y divide-[var(--border)] overflow-y-auto">
-              {HOST_STADIUMS[host.name].map((s) => (
-                <li key={s.stadium} className="flex items-center gap-3 py-2.5">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--bg-2)] text-[var(--green)]">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                  </span>
-                  <div className="min-w-0 flex-1 text-left">
-                    <p className="text-sm font-bold text-[var(--navy)]">{s.city}</p>
-                    <p className="truncate text-xs text-[var(--muted)]">{s.stadium}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-5 overflow-y-auto">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                World Cup 2026 - knockout path
+              </p>
+              {results.length ? (
+                <ul className="divide-y divide-[var(--border)]">
+                  {results.map((m, i) => (
+                    <li key={i} className="flex items-center gap-3 py-2">
+                      <span
+                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white ${
+                          m.result === "won"
+                            ? "bg-[var(--green)]"
+                            : m.result === "lost"
+                              ? "bg-[var(--maroon)]"
+                              : "bg-[var(--gold)]"
+                        }`}
+                      >
+                        {m.result === "won" ? "W" : m.result === "lost" ? "L" : "•"}
+                      </span>
+                      <div className="min-w-0 flex-1 text-left">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">{m.round}</p>
+                        <p className="text-sm font-bold text-[var(--navy)]">
+                          {m.result === "won" ? "Beat " : m.result === "lost" ? "Lost to " : "vs "}
+                          {m.opp}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--muted)]">Did not reach the Round of 16.</p>
+              )}
+
+              {detail.host && HOST_STADIUMS[detail.name] && (
+                <>
+                  <p className="mb-2 mt-5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                    Host stadiums ({HOST_STADIUMS[detail.name].length})
+                  </p>
+                  <ul className="divide-y divide-[var(--border)]">
+                    {HOST_STADIUMS[detail.name].map((s) => (
+                      <li key={s.stadium} className="flex items-center gap-3 py-2.5">
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--bg-2)] text-[var(--green)]">
+                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0 flex-1 text-left">
+                          <p className="text-sm font-bold text-[var(--navy)]">{s.city}</p>
+                          <p className="truncate text-xs text-[var(--muted)]">{s.stadium}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
