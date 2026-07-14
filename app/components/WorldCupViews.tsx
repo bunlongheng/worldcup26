@@ -28,8 +28,8 @@ const TABS: { id: View; label: string }[] = [
   { id: "flags", label: "Flags" },
   { id: "groups", label: "Groups" },
   { id: "bracket", label: "Bracket" },
-  { id: "map", label: "Map (2D)" },
-  { id: "globe", label: "Globe (3D)" },
+  { id: "map", label: "Map" },
+  { id: "globe", label: "Globe" },
 ];
 
 const CONF_ORDER: Confed[] = ["CONCACAF", "CONMEBOL", "UEFA", "CAF", "AFC", "OFC"];
