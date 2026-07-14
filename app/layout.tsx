@@ -14,9 +14,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "World Cup 26 - United 2026",
+  title: "World Cup 2026",
   description:
-    "FIFA World Cup 2026. 48 teams, 16 host cities, 3 nations. USA, Canada and Mexico. Live countdown, host cities and tournament facts.",
+    "FIFA World Cup 2026 - all 48 qualified nations with flags, groups, a live knockout bracket, and an interactive world map and globe.",
 };
 
 export default function RootLayout({

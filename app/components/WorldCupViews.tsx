@@ -10,6 +10,7 @@ import {
   GROUP_ACCENTS,
   CONFED_LABEL,
   teamsByGroup,
+  textOn,
   type Confed,
 } from "../data/teams";
 
@@ -47,14 +48,14 @@ function FlagsView() {
   );
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
       {ordered.map((t) => (
         <div
           key={t.name}
-          className="flex flex-col items-center rounded-lg border border-[var(--border)] bg-white px-1.5 py-2 transition-shadow hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
+          className="flex flex-col items-center rounded-xl border border-[var(--border)] bg-white px-2 py-3.5 transition-shadow hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
         >
-          <Flag code={t.flag} name={t.name} className="h-8 w-[52px]" />
-          <span className="mt-1.5 text-center text-[11px] font-bold leading-tight text-[var(--navy)]">
+          <Flag code={t.flag} name={t.name} className="h-[48px] w-[72px]" />
+          <span className="mt-2 text-center text-sm font-bold leading-tight text-[var(--navy)]">
             {t.name}
           </span>
         </div>
@@ -75,8 +76,8 @@ function GroupsView() {
             className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm"
           >
             <div
-              className="flex items-center justify-between px-4 py-2 text-white"
-              style={{ background: accent }}
+              className="flex items-center justify-between px-4 py-2"
+              style={{ background: accent, color: textOn(accent) }}
             >
               <span className="text-base font-extrabold tracking-wide">GROUP {letter}</span>
               <span className="text-base font-extrabold opacity-70">{letter}</span>
@@ -154,7 +155,7 @@ function TeamCell({
   const t = BY_NAME[name];
   return (
     <div
-      className={`flex items-center gap-1.5 rounded px-1 py-1 ${
+      className={`flex items-center gap-2.5 rounded-md px-2 py-2 ${
         divider ? "border-b border-[var(--border)]" : ""
       } ${state === "win" ? "bg-[rgba(42,157,63,0.12)]" : ""}`}
     >
@@ -162,11 +163,11 @@ function TeamCell({
         <Flag
           code={t.flag}
           name={t.name}
-          className={`h-4 w-6 shrink-0 ${state === "lose" ? "opacity-45" : ""}`}
+          className={`h-7 w-10 shrink-0 ${state === "lose" ? "opacity-45" : ""}`}
         />
       )}
       <span
-        className={`truncate text-[11px] ${
+        className={`truncate text-sm ${
           state === "win"
             ? "font-extrabold text-[var(--navy)]"
             : state === "lose"
@@ -176,7 +177,7 @@ function TeamCell({
       >
         {t ? t.name : name}
       </span>
-      {state === "win" && <span className="ml-auto text-[10px] text-[var(--green)]">✓</span>}
+      {state === "win" && <span className="ml-auto text-sm font-bold text-[var(--green)]">✓</span>}
     </div>
   );
 }

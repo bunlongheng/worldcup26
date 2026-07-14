@@ -14,6 +14,7 @@ import {
   CONFED_LABEL,
   GROUP_ACCENTS,
   GROUP_LETTERS,
+  textOn,
   type Team,
 } from "../data/teams";
 
@@ -122,7 +123,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       <div className="flex-1">
-        <div className={`mx-auto w-full ${isGlobe ? "max-w-[540px]" : "max-w-[960px] overflow-hidden rounded-2xl"}`}>
+        <div className={`mx-auto w-full ${isGlobe ? "max-w-[680px]" : "max-w-[1200px] overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className={`w-full touch-none select-none ${
@@ -199,8 +200,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             {GROUP_LETTERS.map((letter) => (
               <span
                 key={letter}
-                className="rounded-md px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ background: GROUP_ACCENTS[letter] }}
+                className="rounded-md px-2 py-0.5 text-[11px] font-bold"
+                style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
               >
                 {letter}
               </span>
@@ -220,8 +221,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                   <span className="mt-3 text-xl font-extrabold text-[var(--navy)]">{t.name}</span>
                   <div className="mt-2 flex items-center gap-2">
                     <span
-                      className="rounded-full px-3 py-1 text-xs font-bold text-white"
-                      style={{ background: GROUP_ACCENTS[t.group] }}
+                      className="rounded-full px-3 py-1 text-xs font-bold"
+                      style={{ background: GROUP_ACCENTS[t.group], color: textOn(GROUP_ACCENTS[t.group]) }}
                     >
                       Group {t.group}
                     </span>

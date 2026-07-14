@@ -88,13 +88,23 @@ export const CONFED_LABEL: Record<Confed, string> = {
   OFC: "Oceania",
 };
 
-// 12 distinct group colors - shared by the group cards, the map and the panel
-// so the same color always means the same group.
+// 12 group colors drawn from the official FIFA World Cup 26 brand palette
+// (oranges, greens, blues, lime, reds). Same color always means the same group.
 export const GROUP_ACCENTS: Record<string, string> = {
-  A: "#e63946", B: "#2a9d3f", C: "#1d4ed8", D: "#ea6d0a",
-  E: "#8e24aa", F: "#0e9bb0", G: "#d6336c", H: "#b8860b",
-  I: "#8d5524", J: "#0f766e", K: "#6d8600", L: "#3730a3",
+  A: "#e8481c", B: "#3aaa4e", C: "#2749d6", D: "#8f2417",
+  E: "#0e5c3d", F: "#7ba7f0", G: "#c1de39", H: "#e67817",
+  I: "#158f7e", J: "#5a78e6", K: "#86b93a", L: "#c62e2e",
 };
+
+// pick readable text (dark or white) for a given brand color
+export function textOn(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  return lum > 150 ? "#0b0b0b" : "#ffffff";
+}
 
 export function teamsByGroup(letter: string): Team[] {
   return TEAMS.filter((t) => t.group === letter);
