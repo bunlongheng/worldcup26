@@ -15,6 +15,7 @@ import {
   COUNTRY_INFO,
   GROUP_ACCENTS,
   GROUP_LETTERS,
+  teamsByGroup,
   textOn,
   type Team,
 } from "../data/teams";
@@ -96,6 +97,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const [rot, setRot] = useState<[number, number]>([-15, -18]);
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const dragging = useRef(false);
   const moved = useRef(false);
   const last = useRef<[number, number] | null>(null);
@@ -166,6 +168,12 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const pick = (a3: string) => {
     if (moved.current) return; // ignore drag-release on the globe
     setSelected(a3);
+    setSelectedGroup(null);
+    spin.current = false;
+  };
+  const pickGroup = (letter: string) => {
+    setSelectedGroup((g) => (g === letter ? null : letter));
+    setSelected(null);
     spin.current = false;
   };
 
@@ -178,11 +186,20 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const qualified = features.filter((f) => QUALIFIED.has(f.properties.a3));
   const others = features.filter((f) => !QUALIFIED.has(f.properties.a3));
   const selectedTeams = selected ? BY_ISO3[selected] ?? [] : [];
-  const selFeat = selected ? qualified.find((f) => f.properties.a3 === selected) : null;
-  const selPath = selFeat ? path(selFeat as never) : null;
-  const selCol = selected
-    ? GROUP_ACCENTS[BY_ISO3[selected]?.[0]?.group] || "#2fa84f"
-    : "#2fa84f";
+  const inGroup = (a3: string, g: string) => (BY_ISO3[a3] || []).some((t) => t.group === g);
+  const activeSet = new Set<string>();
+  if (selectedGroup) {
+    qualified.forEach((f) => {
+      if (inGroup(f.properties.a3, selectedGroup)) activeSet.add(f.properties.a3);
+    });
+  } else if (selected) {
+    activeSet.add(selected);
+  }
+  const anySel = !!(selected || selectedGroup);
+  const glowColor = (a3: string) =>
+    selectedGroup
+      ? GROUP_ACCENTS[selectedGroup]
+      : GROUP_ACCENTS[BY_ISO3[a3]?.[0]?.group] || "#2fa84f";
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -242,7 +259,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                     key={i}
                     d={d}
                     fill={col}
-                    fillOpacity={selected && !isSel ? 0.3 : isHover ? 0.85 : 1}
+                    fillOpacity={anySel && !activeSet.has(a3) ? 0.3 : isHover ? 0.85 : 1}
                     stroke={isHover ? "#14213d" : "#ffffff"}
                     strokeWidth={isHover ? 1.2 : 0.8}
                     className="cursor-pointer"
@@ -255,20 +272,20 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               })}
             </g>
 
-            {/* selected country pops: pulsing glow ring + bright fill on top */}
-            {selPath && (
-              <g className="pointer-events-none">
-                <path
-                  d={selPath}
-                  fill="none"
-                  stroke={selCol}
-                  strokeWidth={5}
-                  filter="url(#sel-glow)"
-                  className="sel-pulse"
-                />
-                <path d={selPath} fill={selCol} stroke="#ffffff" strokeWidth={2.4} />
-              </g>
-            )}
+            {/* selected country/group pops: pulsing glow ring + bright fill on top */}
+            {qualified
+              .filter((f) => activeSet.has(f.properties.a3))
+              .map((f, i) => {
+                const d = path(f as never);
+                if (!d) return null;
+                const c = glowColor(f.properties.a3);
+                return (
+                  <g key={`sel-${i}`} className="pointer-events-none">
+                    <path d={d} fill="none" stroke={c} strokeWidth={5} filter="url(#sel-glow)" className="sel-pulse" />
+                    <path d={d} fill={c} stroke="#ffffff" strokeWidth={2.4} />
+                  </g>
+                );
+              })}
 
             {isGlobe && (
               <circle cx={W / 2} cy={H / 2} r={GLOBE / 2 - 6} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} className="pointer-events-none" />
@@ -280,13 +297,17 @@ export default function WorldMap({ mode }: { mode: Mode }) {
           {/* group color legend */}
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
             {GROUP_LETTERS.map((letter) => (
-              <span
+              <button
                 key={letter}
-                className="rounded-md px-2 py-0.5 text-[11px] font-bold"
+                type="button"
+                onClick={() => pickGroup(letter)}
+                className={`rounded-md px-2 py-0.5 text-[11px] font-bold transition-transform hover:scale-110 ${
+                  selectedGroup === letter ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
+                }`}
                 style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
               >
                 {letter}
-              </span>
+              </button>
             ))}
           </div>
         </div>
@@ -330,6 +351,39 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                 </div>
               ))}
             </div>
+          ) : selectedGroup ? (
+            <div>
+              <div
+                className="mb-2 flex items-center justify-between rounded-lg px-3 py-2"
+                style={{ background: GROUP_ACCENTS[selectedGroup], color: textOn(GROUP_ACCENTS[selectedGroup]) }}
+              >
+                <span className="text-base font-extrabold tracking-wide">GROUP {selectedGroup}</span>
+                <span className="text-base font-extrabold opacity-70">{selectedGroup}</span>
+              </div>
+              <ul>
+                {teamsByGroup(selectedGroup).map((t) => (
+                  <li key={t.name}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelected(t.iso3);
+                        setSelectedGroup(null);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-[var(--bg-2)]"
+                    >
+                      <Flag code={t.flag} name={t.name} className="h-5 w-8 shrink-0" />
+                      <span className="flex-1 text-sm font-semibold text-[var(--navy)]">{t.name}</span>
+                      {t.host && (
+                        <span className="rounded-full bg-[var(--navy)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                          Host
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 px-2 text-[11px] text-[var(--muted)]">Tap a team for its full stats.</p>
+            </div>
           ) : (
             <div className="flex flex-col items-center py-6 text-center">
               <svg viewBox="0 0 48 48" className="h-12 w-12 text-[var(--green)]" aria-hidden="true">
@@ -337,9 +391,9 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                 <circle cx="24" cy="24" r="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5" />
                 <circle cx="24" cy="24" r="5.5" fill="currentColor" />
               </svg>
-              <p className="mt-3 text-sm font-semibold text-[var(--navy)]">Tap any country</p>
+              <p className="mt-3 text-sm font-semibold text-[var(--navy)]">Tap any country or group</p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Its flag and group will show up right here.
+                Flags, groups and stats show up right here.
               </p>
             </div>
           )}
