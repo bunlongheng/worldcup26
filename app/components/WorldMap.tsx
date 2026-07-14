@@ -55,10 +55,18 @@ export default function WorldMap({ mode }: { mode: Mode }) {
     if (mode !== "globe") return;
     let raf = 0;
     let prev = performance.now();
+    let acc = 0; // cap state updates to ~25fps so we don't re-render 177 paths every frame
     const tick = (t: number) => {
       const dt = t - prev;
       prev = t;
-      if (spin.current && !dragging.current) setRot((r) => [r[0] + dt * 0.006, r[1]]);
+      if (spin.current && !dragging.current && !document.hidden) {
+        acc += dt;
+        if (acc >= 40) {
+          const step = acc;
+          acc = 0;
+          setRot((r) => [r[0] + step * 0.006, r[1]]);
+        }
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -155,7 +163,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             viewBox={`0 0 ${W} ${H}`}
             className={`block max-w-full touch-none select-none ${
               isGlobe
-                ? "h-[380px] w-auto cursor-grab active:cursor-grabbing sm:h-[520px]"
+                ? "h-[340px] w-auto cursor-grab active:cursor-grabbing sm:h-[calc(100vh_-_230px)] sm:max-h-[820px]"
                 : "h-[190px] w-auto sm:h-[520px]"
             }`}
             onPointerDown={onDown}
@@ -196,7 +204,6 @@ export default function WorldMap({ mode }: { mode: Mode }) {
                 const d = path(f as never);
                 if (!d) return null;
                 const a3 = f.properties.a3;
-                const isSel = selected === a3;
                 const isHover = hovered === a3;
                 const grp = BY_ISO3[a3]?.[0]?.group;
                 const col = (grp && GROUP_ACCENTS[grp]) || "#2fa84f";

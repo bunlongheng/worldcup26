@@ -48,7 +48,7 @@ export default function ThemeSong() {
         ref={audioRef}
         src="/theme.mp3"
         loop
-        preload="auto"
+        preload="none"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />

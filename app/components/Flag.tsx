@@ -18,9 +18,8 @@ export default function Flag({
         src={`https://flagcdn.com/w320/${code}.png`}
         alt={`${name} flag`}
         fill
-        sizes="48px"
+        sizes="72px"
         className="object-cover"
-        unoptimized
       />
     </span>
   );

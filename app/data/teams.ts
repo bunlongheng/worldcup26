@@ -319,6 +319,11 @@ export function matchesFor(name: string): MatchRow[] {
   return MATCHES.filter((m) => m.a === name || m.b === name);
 }
 
+export const TEAM_BY_NAME: Record<string, Team> = TEAMS.reduce(
+  (acc, t) => ((acc[t.name] = t), acc),
+  {} as Record<string, Team>
+);
+
 export function teamsByGroup(letter: string): Team[] {
   return TEAMS.filter((t) => t.group === letter);
 }

@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start -p 3009",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint",
-    "prepare": "husky"
+    "lint": "eslint .",
+    "prepare": "husky",
+    "test": "node --experimental-strip-types --test tests/data.test.ts"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
@@ -17,13 +18,21 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
+    "@next/eslint-plugin-next": "^16.2.10",
     "@tailwindcss/postcss": "^4",
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
     "husky": "^9.1.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.64.0"
+  },
+  "overrides": {
+    "postcss": ">=8.5.10"
   }
 }
