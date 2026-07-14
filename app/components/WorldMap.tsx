@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   geoOrthographic,
   geoEquirectangular,
@@ -8,75 +8,16 @@ import {
   geoGraticule10,
 } from "d3-geo";
 import Flag from "./Flag";
+import CountryCard from "./CountryCard";
 import {
   TEAMS,
   QUALIFIED_ISO3,
-  CONFED_LABEL,
-  COUNTRY_INFO,
   GROUP_ACCENTS,
   GROUP_LETTERS,
   teamsByGroup,
   textOn,
   type Team,
 } from "../data/teams";
-
-const I = "h-4 w-4";
-const StarIcon = () => (
-  <svg viewBox="0 0 24 24" className={I} fill="currentColor" aria-hidden="true">
-    <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
-  </svg>
-);
-const GlobeIcon = () => (
-  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" />
-  </svg>
-);
-const PeopleIcon = () => (
-  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-const AreaIcon = () => (
-  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-  </svg>
-);
-const MoneyIcon = () => (
-  <svg viewBox="0 0 24 24" className={I} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="12" y1="2" x2="12" y2="22" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
-
-function StatRow({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  color: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <span
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
-        style={{ background: `${color}1f`, color }}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--muted)]">{label}</p>
-        <p className="truncate text-sm font-bold text-[var(--navy)]">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 type Feature = { properties: { a3: string }; geometry: unknown };
 type Mode = "flat" | "globe";
@@ -202,8 +143,9 @@ export default function WorldMap({ mode }: { mode: Mode }) {
       : GROUP_ACCENTS[BY_ISO3[a3]?.[0]?.group] || "#2fa84f";
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-      <div className="flex-1 overflow-x-auto">
+    <div className="flex min-h-[calc(100vh-170px)] flex-col">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="flex-1 overflow-x-auto">
         <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
@@ -291,27 +233,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               <circle cx={W / 2} cy={H / 2} r={GLOBE / 2 - 6} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} className="pointer-events-none" />
             )}
           </svg>
-          <p className="mt-4 text-center text-sm text-[var(--muted)]">
-            {isGlobe ? "Drag to spin. " : ""}Tap a country to see its flag - each color is a group.
-          </p>
-          {/* group color legend */}
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            {GROUP_LETTERS.map((letter) => (
-              <button
-                key={letter}
-                type="button"
-                onClick={() => pickGroup(letter)}
-                className={`rounded-md px-2 py-0.5 text-[11px] font-bold transition-transform hover:scale-110 ${
-                  selectedGroup === letter ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
-                }`}
-                style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
         </div>
-      </div>
+        </div>
 
       {/* click-to-reveal panel */}
       <aside className="w-full shrink-0 lg:w-72">
@@ -319,36 +242,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
           {selectedTeams.length > 0 ? (
             <div className="flex flex-col gap-4">
               {selectedTeams.map((t) => (
-                <div key={t.name} className="flex flex-col items-center text-center">
-                  <Flag code={t.flag} name={t.name} className="h-[86px] w-[128px]" />
-                  <span className="mt-3 text-xl font-extrabold text-[var(--navy)]">{t.name}</span>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span
-                      className="rounded-full px-3 py-1 text-xs font-bold"
-                      style={{ background: GROUP_ACCENTS[t.group], color: textOn(GROUP_ACCENTS[t.group]) }}
-                    >
-                      Group {t.group}
-                    </span>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-                      {CONFED_LABEL[t.confed]}
-                    </span>
-                  </div>
-                  {t.host && (
-                    <span className="mt-2 rounded-full bg-[var(--navy)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                      Host nation
-                    </span>
-                  )}
-
-                  {COUNTRY_INFO[t.name] && (
-                    <div className="mt-4 w-full space-y-2.5 border-t border-[var(--border)] pt-4 text-left">
-                      <StatRow icon={<StarIcon />} label="Capital" value={COUNTRY_INFO[t.name].capital} color={GROUP_ACCENTS[t.group]} />
-                      <StatRow icon={<GlobeIcon />} label="Continent" value={COUNTRY_INFO[t.name].continent} color={GROUP_ACCENTS[t.group]} />
-                      <StatRow icon={<PeopleIcon />} label="Population" value={COUNTRY_INFO[t.name].population} color={GROUP_ACCENTS[t.group]} />
-                      <StatRow icon={<AreaIcon />} label="Area" value={COUNTRY_INFO[t.name].area} color={GROUP_ACCENTS[t.group]} />
-                      <StatRow icon={<MoneyIcon />} label="Currency" value={COUNTRY_INFO[t.name].currency} color={GROUP_ACCENTS[t.group]} />
-                    </div>
-                  )}
-                </div>
+                <CountryCard key={t.name} team={t} />
               ))}
             </div>
           ) : selectedGroup ? (
@@ -399,6 +293,29 @@ export default function WorldMap({ mode }: { mode: Mode }) {
           )}
         </div>
       </aside>
+      </div>
+
+      {/* caption + legend pinned to the bottom of the view height */}
+      <div className="mt-auto pt-8">
+        <p className="text-center text-sm text-[var(--muted)]">
+          {isGlobe ? "Drag to spin. " : ""}Tap a country or a group letter - each color is a group.
+        </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {GROUP_LETTERS.map((letter) => (
+            <button
+              key={letter}
+              type="button"
+              onClick={() => pickGroup(letter)}
+              className={`rounded-md px-2.5 py-1 text-xs font-bold transition-transform hover:scale-110 ${
+                selectedGroup === letter ? "scale-125 ring-2 ring-[var(--navy)] ring-offset-1" : ""
+              }`}
+              style={{ background: GROUP_ACCENTS[letter], color: textOn(GROUP_ACCENTS[letter]) }}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
