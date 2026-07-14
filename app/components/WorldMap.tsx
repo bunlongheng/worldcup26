@@ -151,7 +151,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             viewBox={`0 0 ${W} ${H}`}
             className={`block h-[380px] w-auto max-w-full touch-none select-none sm:h-[520px] ${
               isGlobe
-                ? "cursor-grab active:cursor-grabbing [filter:drop-shadow(0_24px_50px_rgba(20,33,61,0.28))]"
+                ? "cursor-grab active:cursor-grabbing"
                 : ""
             }`}
             onPointerDown={onDown}
