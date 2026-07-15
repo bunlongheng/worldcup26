@@ -94,8 +94,8 @@ export default function FloatingBall() {
           vx: Math.cos(a) * spd + s.vx * 0.12,
           vy: Math.sin(a) * spd - (fire ? 30 : 22), // rise
           age: 0,
-          life: fire ? 0.45 + Math.random() * 0.3 : 0.55 + Math.random() * 0.65, // smoke clears quicker
-          size: fire ? 12 + Math.random() * 14 : 9 + Math.random() * 9,
+          life: fire ? 0.45 + Math.random() * 0.3 : 0.28 + Math.random() * 0.32, // short smoke trail
+          size: fire ? 12 + Math.random() * 14 : 7.2 + Math.random() * 7.2,
           fire,
           shade: fire ? 0 : 45 + Math.random() * 120, // mix black (45) -> grey (165)
         });
@@ -230,7 +230,7 @@ export default function FloatingBall() {
       if (span > 0) {
         s.vx = (b.x - a.x) / span; s.vy = (b.y - a.y) / span;
         let cap = MAX_SPEED;
-        if (s.fireArmed) { s.vx *= 3; s.vy *= 3; cap = MAX_SPEED * 3; s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; } // fire = 3x launch
+        if (s.fireArmed) { s.vx *= 5; s.vy *= 5; cap = MAX_SPEED * 5; s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; } // fire = 5x launch
         const sp = Math.hypot(s.vx, s.vy);
         if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; }
       } else { s.vx = 0; s.vy = 0; }
