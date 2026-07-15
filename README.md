@@ -32,8 +32,20 @@ An interactive companion for the 2026 FIFA World Cup: all 48 qualified nations i
 - Tap a country or a group letter to highlight it with a glow and open the side panel; drag to spin the globe.
 - Country detail modal: flag, group, confederation, capital, continent, population, area, currency, and every match with its real score (W / L / D).
 - Host nations open their full stadium list (16 venues) inside the same modal.
+- A physics-driven floating ball on every page: drag to grab, flick to throw, and it ricochets off the window edges with real velocity-based bounces (see below).
 - Official theme audio, loaded lazily and toggled from the header - nothing downloads until you press play.
 - Fully responsive from phone to desktop with no horizontal scroll; real FIFA 26 emblem as favicon and iOS icon.
+
+### The floating ball
+
+A World Cup ball floats above every page (`FloatingBall.tsx`) with a small physics engine:
+
+- **Flick to throw** - the release velocity is measured from your last ~90ms of drag, so a hard flick flies far and bounces many times, a gentle one barely moves.
+- **Real bounces** - it reflects off all four window edges keeping 72% of its energy each hit, with a rolling spin, then settles and idles (the animation loop sleeps at rest to save battery).
+- **Shake to ignite** - wiggle it left/right fast: 3+ reversals leave a black-and-grey smoke trail, 6+ set it on fire and the next throw launches at 5x speed, with a canvas particle trail.
+- It stays above modals but never covers the header, and the smoke/fire canvas is `pointer-events: none` so it never blocks a tap.
+
+The bug-prone math (release velocity, wall bounce, shake detection) is isolated in `ballPhysics.ts` and unit-tested.
 
 ### The five views
 
@@ -85,6 +97,7 @@ One data module, one direction of flow:
 | Views | `app/components/views/*`, `app/components/WorldMap.tsx` | Flags, Groups, Bracket (pure) + the lazy d3-geo Map/Globe |
 | Data | `app/data/teams.ts` | Single source: 48 teams, 12 groups, 102 matches, 16 stadiums, country stats + lookups (`TEAM_BY_NAME`, `matchesFor`) |
 | Leaf | `Flag`, `Logo`, `ThemeSong`, `CountryCard` | Small presentational pieces reused across views |
+| Overlay | `FloatingBall.tsx` + `ballPhysics.ts` | Physics ball + canvas smoke/fire, mounted once in the root layout; pure math split out and tested |
 | Assets | `public/world.geojson`, `public/theme.mp3` | Slimmed Natural Earth geometry + the theme clip |
 
 `WorldMap` is loaded with `next/dynamic` (`ssr: false`), so d3-geo and the geojson stay out of the initial bundle until you open the Map or Globe tab. The same component swaps between `geoEquirectangular` (flat map) and `geoOrthographic` (globe) on a single prop.
@@ -149,6 +162,8 @@ app/
   components/
     WorldCupViews.tsx      app shell: header, tabs, view switch
     WorldMap.tsx           d3-geo 2D map + 3D globe (lazy, client)
+    FloatingBall.tsx       physics ball + canvas smoke/fire (above all pages)
+    ballPhysics.ts         pure, tested ball math (velocity, bounce, shake)
     Flag.tsx               next/image flag
     Logo.tsx               FIFA 26 emblem
     ThemeSong.tsx          lazy theme-audio toggle
@@ -160,9 +175,11 @@ app/
 public/
   world.geojson            Natural Earth 110m geometry (244KB)
   theme.mp3                official theme clip
+  ball.png                 the floating World Cup ball sprite
   wc26-logo.png            emblem
 tests/
   data.test.ts             data-integrity assertions
+  ballPhysics.test.ts      ball physics assertions
 .github/workflows/ci.yml   typecheck, lint, test, build
 ```
 

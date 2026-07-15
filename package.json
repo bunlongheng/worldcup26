@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "prepare": "husky",
-    "test": "node --experimental-strip-types --test tests/data.test.ts"
+    "test": "node --experimental-strip-types --test tests/data.test.ts tests/ballPhysics.test.ts"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",

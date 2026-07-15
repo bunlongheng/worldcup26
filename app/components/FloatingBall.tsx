@@ -2,23 +2,18 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { BALL, releaseVelocity, bounceAxis, shakeStep } from "./ballPhysics";
 
 /* A World Cup ball that floats above everything. Drag to grab, flick to throw -
    it ricochets off the window edges with real physics: the release velocity
    sets how hard and how many times it bounces.
    - Fast motion leaves a smoke trail.
    - Shake it left/right fast: 3+ reversals -> smoke, 6+ -> it catches FIRE and
-     the next throw launches at 2x speed. */
+     the next throw launches at 5x speed.
+   Pure math (release velocity, wall bounce, shake detection) lives in ballPhysics.ts. */
 
-const SIZE = 58; // ball diameter in px
-const RESTITUTION = 0.72; // energy kept per wall bounce
-const DRAG = 0.6; // air damping (per second, exponential)
-const MAX_SPEED = 4200; // px/s clamp on a flick
-const REST_SPEED = 12; // below this it settles and idles
-const SMOKE_SPEED = 850; // above this speed the ball smokes
-const SHAKE_MIN = 6; // px of horizontal travel to count as a direction
-const SHAKE_WINDOW = 450; // ms allowed between shake reversals
-const FIRE_MS = 2200; // how long fire lasts after a 6-shake
+const { size: SIZE, drag: DRAG, restSpeed: REST_SPEED, smokeSpeed: SMOKE_SPEED,
+  shakeWindow: SHAKE_WINDOW, fireMs: FIRE_MS } = BALL;
 
 type Particle = { x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; fire: boolean; shade: number };
 
@@ -100,7 +95,7 @@ export default function FloatingBall() {
           shade: fire ? 0 : 45 + Math.random() * 120, // mix black (45) -> grey (165)
         });
       }
-      if (parts.current.length > 400) parts.current.splice(0, parts.current.length - 400);
+      if (parts.current.length > BALL.maxParticles) parts.current.splice(0, parts.current.length - BALL.maxParticles);
     }
 
     function drawParticles(dt: number, fireOn: boolean) {
@@ -155,17 +150,15 @@ export default function FloatingBall() {
       // emission: fire wins, else smoke when shaking hard, moving fast, or
       // still smoldering after the fire went out (until the ball stops)
       if (fireOn) emit(3, true);
-      else if (s.reversals >= 3 || speed > SMOKE_SPEED || (s.smoldering && speed > 200)) emit(2, false);
+      else if (s.reversals >= BALL.smokeShakes || speed > SMOKE_SPEED || (s.smoldering && speed > 200)) emit(2, false);
 
       if (!s.dragging) {
         const d = Math.exp(-DRAG * dt);
         s.vx *= d; s.vy *= d;
         s.x += s.vx * dt; s.y += s.vy * dt;
 
-        if (s.x < 0) { s.x = 0; s.vx = -s.vx * RESTITUTION; }
-        else if (s.x > maxX) { s.x = maxX; s.vx = -s.vx * RESTITUTION; }
-        if (s.y < 0) { s.y = 0; s.vy = -s.vy * RESTITUTION; } // bounce off the true top edge
-        else if (s.y > maxY) { s.y = maxY; s.vy = -s.vy * RESTITUTION; }
+        const bx = bounceAxis(s.x, s.vx, maxX); s.x = bx.p; s.vx = bx.v;
+        const by = bounceAxis(s.y, s.vy, maxY); s.y = by.p; s.vy = by.v; // 0 = true top edge
 
         s.angle += ((s.vx * dt) / R) * (180 / Math.PI);
         render();
@@ -206,12 +199,12 @@ export default function FloatingBall() {
       if (mdt > 0) { s.vx = dx / mdt; s.vy = dy / mdt; } // live velocity for the trail
 
       // shake detection: count fast left/right reversals
-      const sign = dx > SHAKE_MIN ? 1 : dx < -SHAKE_MIN ? -1 : 0;
+      const { sign, reversed } = shakeStep(dx, s.shakeSign);
       if (sign !== 0) {
-        if (s.shakeSign !== 0 && sign !== s.shakeSign) {
+        if (reversed) {
           s.reversals = now - s.lastRev < SHAKE_WINDOW ? s.reversals + 1 : 1;
           s.lastRev = now;
-          if (s.reversals >= 6) { s.fireArmed = true; s.fireUntil = now + FIRE_MS; s.smoldering = true; }
+          if (s.reversals >= BALL.fireShakes) { s.fireArmed = true; s.fireUntil = now + FIRE_MS; s.smoldering = true; }
         }
         s.shakeSign = sign;
       }
@@ -225,15 +218,9 @@ export default function FloatingBall() {
       if (!s.dragging) return;
       s.dragging = false;
       try { ballRef.current?.releasePointerCapture(e.pointerId); } catch { /* already released */ }
-      const a = s.samples[0], b = s.samples[s.samples.length - 1];
-      const span = (b.t - a.t) / 1000;
-      if (span > 0) {
-        s.vx = (b.x - a.x) / span; s.vy = (b.y - a.y) / span;
-        let cap = MAX_SPEED;
-        if (s.fireArmed) { s.vx *= 5; s.vy *= 5; cap = MAX_SPEED * 5; s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; } // fire = 5x launch
-        const sp = Math.hypot(s.vx, s.vy);
-        if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; }
-      } else { s.vx = 0; s.vy = 0; }
+      const v = releaseVelocity(s.samples, s.fireArmed); // handles the 5x fire boost + speed cap
+      s.vx = v.x; s.vy = v.y;
+      if (s.fireArmed && (v.x || v.y)) { s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; }
       s.samples = []; s.reversals = 0; s.shakeSign = 0;
       start();
     };
