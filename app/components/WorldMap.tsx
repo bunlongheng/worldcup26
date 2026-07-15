@@ -10,6 +10,7 @@ import {
 } from "d3-geo";
 import Flag from "./Flag";
 import CountryCard from "./CountryCard";
+import { teamsByIso3, activeIso3, activeGroupLetters, glowColorFor } from "./mapPicking";
 import {
   TEAMS,
   QUALIFIED_ISO3,
@@ -17,7 +18,6 @@ import {
   GROUP_LETTERS,
   teamsByGroup,
   textOn,
-  type Team,
 } from "../data/teams";
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, { a3: string }>;
@@ -29,11 +29,7 @@ const GLOBE = 540;
 const FLAT_W = 960;
 const FLAT_H = 480; // 2:1 rectangle (equirectangular)
 
-// iso3 -> teams (England & Scotland both share GBR)
-const BY_ISO3 = TEAMS.reduce<Record<string, Team[]>>((acc, t) => {
-  (acc[t.iso3] ||= []).push(t);
-  return acc;
-}, {});
+const BY_ISO3 = teamsByIso3(TEAMS);
 
 export default function WorldMap({ mode }: { mode: Mode }) {
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -137,24 +133,10 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const qualified = features.filter((f) => QUALIFIED.has(f.properties.a3));
   const others = features.filter((f) => !QUALIFIED.has(f.properties.a3));
   const selectedTeams = selected ? BY_ISO3[selected] ?? [] : [];
-  const inGroup = (a3: string, g: string) => (BY_ISO3[a3] || []).some((t) => t.group === g);
-  const activeSet = new Set<string>();
-  if (selectedGroup) {
-    qualified.forEach((f) => {
-      if (inGroup(f.properties.a3, selectedGroup)) activeSet.add(f.properties.a3);
-    });
-  } else if (selected) {
-    activeSet.add(selected);
-  }
+  const activeSet = activeIso3(selected, selectedGroup, qualified.map((f) => f.properties.a3), BY_ISO3);
   const anySel = !!(selected || selectedGroup);
-  const glowColor = (a3: string) =>
-    selectedGroup
-      ? GROUP_ACCENTS[selectedGroup]
-      : GROUP_ACCENTS[BY_ISO3[a3]?.[0]?.group] || "#2fa84f";
-  // which group letters to highlight in the legend (a selected country lights its group)
-  const activeGroups = new Set<string>();
-  if (selectedGroup) activeGroups.add(selectedGroup);
-  else if (selected) (BY_ISO3[selected] || []).forEach((t) => activeGroups.add(t.group));
+  const glowColor = (a3: string) => glowColorFor(a3, selectedGroup, BY_ISO3, GROUP_ACCENTS);
+  const activeGroups = activeGroupLetters(selected, selectedGroup, BY_ISO3);
 
   return (
     <div className="flex w-full min-w-0 flex-col overflow-x-hidden">

@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "prepare": "husky",
-    "test": "node --experimental-strip-types --test tests/data.test.ts tests/ballPhysics.test.ts"
+    "test": "node --experimental-strip-types --test tests/data.test.ts tests/ballPhysics.test.ts tests/mapPicking.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@next/eslint-plugin-next": "^16.2.10",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^20",

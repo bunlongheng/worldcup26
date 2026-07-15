@@ -42,3 +42,8 @@ next-env.d.ts
 
 # local AI agent config (not published)
 CLAUDE.md
+
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Flag from "../Flag";
+import { useDialog } from "../useDialog";
 import {
   GROUP_LETTERS,
   GROUP_ACCENTS,
@@ -27,11 +28,7 @@ const shortStage = (s: string) =>
 export default function GroupsView() {
   const [detail, setDetail] = useState<Team | null>(null);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDetail(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  const dialogRef = useDialog<HTMLDivElement>(!!detail, () => setDetail(null));
 
   const results = detail ? matchesFor(detail.name) : [];
 
@@ -85,7 +82,12 @@ export default function GroupsView() {
           onClick={() => setDetail(null)}
         >
           <div
-            className="reveal relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white p-7 shadow-2xl"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${detail.name} matches`}
+            tabIndex={-1}
+            className="reveal relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white p-7 shadow-2xl outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             <button

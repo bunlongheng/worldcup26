@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Flag from "../Flag";
 import CountryCard from "../CountryCard";
+import { useDialog } from "../useDialog";
 import { TEAMS, type Team, type Confed } from "../../data/teams";
 
 const CONF_ORDER: Confed[] = ["CONCACAF", "CONMEBOL", "UEFA", "CAF", "AFC", "OFC"];
@@ -21,11 +22,7 @@ export default function FlagsView() {
     []
   );
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  const dialogRef = useDialog<HTMLDivElement>(!!open, () => setOpen(null));
 
   return (
     <>
@@ -51,7 +48,12 @@ export default function FlagsView() {
           onClick={() => setOpen(null)}
         >
           <div
-            className="reveal relative w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${open.name} details`}
+            tabIndex={-1}
+            className="reveal relative w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             <button
