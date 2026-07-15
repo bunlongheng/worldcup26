@@ -47,6 +47,11 @@ body {
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
   background-color: var(--bg);
+  /* This is a tap-to-explore app - never select or copy text anywhere */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tnum {

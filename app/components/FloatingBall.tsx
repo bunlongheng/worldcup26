@@ -176,8 +176,7 @@ export default function FloatingBall() {
 
     // ---- pointer (drag, shake, flick) ----
     const onDown = (e: PointerEvent) => {
-      e.preventDefault();
-      document.body.style.userSelect = "none"; document.body.style.webkitUserSelect = "none";
+      e.preventDefault(); // selection is disabled app-wide in CSS
       s.dragging = true;
       s.grabX = e.clientX - s.x; s.grabY = e.clientY - s.y;
       s.samples = [{ t: performance.now(), x: e.clientX, y: e.clientY }];
@@ -215,7 +214,6 @@ export default function FloatingBall() {
       while (s.samples.length > 2 && now - s.samples[0].t > 90) s.samples.shift();
     };
     const onUp = (e: PointerEvent) => {
-      document.body.style.userSelect = ""; document.body.style.webkitUserSelect = "";
       if (!s.dragging) return;
       s.dragging = false;
       try { ballRef.current?.releasePointerCapture(e.pointerId); } catch { /* already released */ }
@@ -223,9 +221,10 @@ export default function FloatingBall() {
       const span = (b.t - a.t) / 1000;
       if (span > 0) {
         s.vx = (b.x - a.x) / span; s.vy = (b.y - a.y) / span;
-        if (s.fireArmed) { s.vx *= 2; s.vy *= 2; s.fireUntil = performance.now() + FIRE_MS; } // fire = 2x launch
+        let cap = MAX_SPEED;
+        if (s.fireArmed) { s.vx *= 3; s.vy *= 3; cap = MAX_SPEED * 3; s.fireUntil = performance.now() + FIRE_MS; } // fire = 3x launch
         const sp = Math.hypot(s.vx, s.vy);
-        if (sp > MAX_SPEED) { s.vx *= MAX_SPEED / sp; s.vy *= MAX_SPEED / sp; }
+        if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; }
       } else { s.vx = 0; s.vy = 0; }
       s.samples = []; s.reversals = 0; s.shakeSign = 0;
       start();
