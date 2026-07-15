@@ -310,8 +310,8 @@ export const MATCHES: MatchRow[] = [
   { stage: "Quarter-final", a: "Spain", b: "Belgium", sa: 2, sb: 1 },
   { stage: "Quarter-final", a: "England", b: "Norway", sa: 2, sb: 1 },
   { stage: "Quarter-final", a: "Argentina", b: "Switzerland", sa: 3, sb: 1 },
-  // Semi-finals (not played yet)
-  { stage: "Semi-final", a: "France", b: "Spain", sa: null, sb: null },
+  // Semi-finals: France lost to Spain; England v Argentina still to play
+  { stage: "Semi-final", a: "France", b: "Spain", sa: 1, sb: 2 },
   { stage: "Semi-final", a: "England", b: "Argentina", sa: null, sb: null },
 ];
 

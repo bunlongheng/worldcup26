@@ -146,9 +146,13 @@ export default function GroupsView() {
                             : "bg-[var(--gold)]";
                     const rl = result === "won" ? "W" : result === "lost" ? "L" : result === "draw" ? "D" : "•";
                     return (
-                      <li key={i} className="flex items-center gap-2.5 py-2">
-                        <span className="w-9 shrink-0 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                      <li key={i} className="flex items-center gap-2 py-2">
+                        <span className="w-8 shrink-0 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]">
                           {shortStage(m.stage)}
+                        </span>
+                        <Flag code={detail.flag} name={detail.name} className="h-4 w-6 shrink-0" />
+                        <span className="shrink-0 tabular-nums text-sm font-extrabold text-[var(--navy)]">
+                          {ts == null || os == null ? <span className="font-semibold text-[var(--muted)]">vs</span> : `${ts}–${os}`}
                         </span>
                         {oppTeam && <Flag code={oppTeam.flag} name={opp} className="h-4 w-6 shrink-0" />}
                         <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-[var(--navy)]">
@@ -157,9 +161,6 @@ export default function GroupsView() {
                         </span>
                         <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white ${rc}`}>
                           {rl}
-                        </span>
-                        <span className="w-10 shrink-0 text-right tabular-nums text-sm font-extrabold text-[var(--navy)]">
-                          {ts == null || os == null ? "vs" : `${ts}–${os}`}
                         </span>
                       </li>
                     );

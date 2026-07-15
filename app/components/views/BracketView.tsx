@@ -31,7 +31,7 @@ const KO_ROUNDS: { name: string; matches: Match[] }[] = [
   {
     name: "Semi-finals",
     matches: [
-      { a: "France", b: "Spain" },
+      { a: "France", b: "Spain", win: "b" },
       { a: "England", b: "Argentina" },
     ],
   },
@@ -117,10 +117,12 @@ export default function BracketView() {
             </h4>
             <div className="flex flex-1 flex-col justify-center">
               <div className="rounded-md border border-[var(--border)] bg-white px-1 py-2 text-center shadow-sm sm:rounded-lg sm:px-2">
-                <p className="text-[9px] font-semibold text-[var(--navy)] sm:text-[11px]">
-                  <span className="sm:hidden">SF1</span>
-                  <span className="hidden sm:inline">Winner SF1</span>
-                </p>
+                <div className="flex items-center justify-center gap-1.5">
+                  {TEAM_BY_NAME["Spain"] && (
+                    <Flag code={TEAM_BY_NAME["Spain"].flag} name="Spain" className="h-3.5 w-5 shrink-0 sm:h-5 sm:w-7" />
+                  )}
+                  <span className="text-[9px] font-extrabold text-[var(--navy)] sm:text-[11px]">Spain</span>
+                </div>
                 <p className="my-1 text-[9px] text-[var(--muted)] sm:text-[10px]">vs</p>
                 <p className="text-[9px] font-semibold text-[var(--navy)] sm:text-[11px]">
                   <span className="sm:hidden">SF2</span>

@@ -28,7 +28,7 @@ type St = {
   samples: { t: number; x: number; y: number }[];
   running: boolean; last: number; topInset: number;
   pmx: number; pmy: number; pmt: number; // previous pointer-move sample
-  shakeSign: number; reversals: number; lastRev: number; fireUntil: number; fireArmed: boolean;
+  shakeSign: number; reversals: number; lastRev: number; fireUntil: number; fireArmed: boolean; smoldering: boolean;
 };
 
 export default function FloatingBall() {
@@ -41,7 +41,7 @@ export default function FloatingBall() {
   const st = useRef<St>({
     x: 0, y: 0, vx: 0, vy: 0, angle: 0,
     dragging: false, grabX: 0, grabY: 0, samples: [], running: false, last: 0, topInset: 80,
-    pmx: 0, pmy: 0, pmt: 0, shakeSign: 0, reversals: 0, lastRev: 0, fireUntil: 0, fireArmed: false,
+    pmx: 0, pmy: 0, pmt: 0, shakeSign: 0, reversals: 0, lastRev: 0, fireUntil: 0, fireArmed: false, smoldering: false,
   });
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function FloatingBall() {
           vx: Math.cos(a) * spd + s.vx * 0.12,
           vy: Math.sin(a) * spd - (fire ? 30 : 22), // rise
           age: 0,
-          life: fire ? 0.45 + Math.random() * 0.3 : 0.7 + Math.random() * 0.5,
+          life: fire ? 0.45 + Math.random() * 0.3 : 1.3 + Math.random() * 1.4, // smoke lingers longer
           size: fire ? 12 + Math.random() * 14 : 9 + Math.random() * 9,
           fire,
         });
@@ -131,9 +131,11 @@ export default function FloatingBall() {
           ctx.fillStyle = `rgba(${col},${a})`;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 - 0.35 * t), 0, 6.283); ctx.fill();
         } else {
+          // smoke: expands and eases to nothing (soft tail, no abrupt cut-off)
           ctx.globalCompositeOperation = "source-over";
-          ctx.fillStyle = `rgba(150,150,150,${0.32 * (1 - t)})`;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.8 + t * 1.6), 0, 6.283); ctx.fill();
+          const a = 0.3 * Math.pow(1 - t, 1.6);
+          ctx.fillStyle = `rgba(150,150,150,${a})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.7 + t * 2.4), 0, 6.283); ctx.fill();
         }
       }
       ctx.globalCompositeOperation = "source-over";
@@ -148,9 +150,10 @@ export default function FloatingBall() {
       const speed = Math.hypot(s.vx, s.vy);
       const fireOn = now < s.fireUntil;
 
-      // emission: fire wins, else smoke when shaking hard or moving fast
+      // emission: fire wins, else smoke when shaking hard, moving fast, or
+      // still smoldering after the fire went out (until the ball stops)
       if (fireOn) emit(3, true);
-      else if (s.reversals >= 3 || speed > SMOKE_SPEED) emit(2, false);
+      else if (s.reversals >= 3 || speed > SMOKE_SPEED || (s.smoldering && speed > REST_SPEED)) emit(2, false);
 
       if (!s.dragging) {
         const d = Math.exp(-DRAG * dt);
@@ -164,7 +167,7 @@ export default function FloatingBall() {
 
         s.angle += ((s.vx * dt) / R) * (180 / Math.PI);
         render();
-        if (speed < REST_SPEED) { s.vx = 0; s.vy = 0; }
+        if (speed < REST_SPEED) { s.vx = 0; s.vy = 0; s.smoldering = false; } // stopped: stop smoking
       }
 
       drawParticles(dt, fireOn);
@@ -203,7 +206,7 @@ export default function FloatingBall() {
         if (s.shakeSign !== 0 && sign !== s.shakeSign) {
           s.reversals = now - s.lastRev < SHAKE_WINDOW ? s.reversals + 1 : 1;
           s.lastRev = now;
-          if (s.reversals >= 6) { s.fireArmed = true; s.fireUntil = now + FIRE_MS; }
+          if (s.reversals >= 6) { s.fireArmed = true; s.fireUntil = now + FIRE_MS; s.smoldering = true; }
         }
         s.shakeSign = sign;
       }
@@ -222,7 +225,7 @@ export default function FloatingBall() {
       if (span > 0) {
         s.vx = (b.x - a.x) / span; s.vy = (b.y - a.y) / span;
         let cap = MAX_SPEED;
-        if (s.fireArmed) { s.vx *= 3; s.vy *= 3; cap = MAX_SPEED * 3; s.fireUntil = performance.now() + FIRE_MS; } // fire = 3x launch
+        if (s.fireArmed) { s.vx *= 5; s.vy *= 5; cap = MAX_SPEED * 5; s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; } // fire = 5x launch
         const sp = Math.hypot(s.vx, s.vy);
         if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; }
       } else { s.vx = 0; s.vy = 0; }
