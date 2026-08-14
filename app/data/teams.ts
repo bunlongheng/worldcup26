@@ -192,7 +192,7 @@ export const HOST_STADIUMS: Record<string, { city: string; stadium: string }[]> 
   ],
 };
 
-// Every match (group stage + knockouts) with real scores. Semi-finals not yet played.
+// Every match (group stage + knockouts) with real scores. Argentina won the final 1-0.
 export type MatchRow = { stage: string; a: string; b: string; sa: number | null; sb: number | null; pens?: string };
 export const MATCHES: MatchRow[] = [
   // Group A
@@ -310,9 +310,11 @@ export const MATCHES: MatchRow[] = [
   { stage: "Quarter-final", a: "Spain", b: "Belgium", sa: 2, sb: 1 },
   { stage: "Quarter-final", a: "England", b: "Norway", sa: 2, sb: 1 },
   { stage: "Quarter-final", a: "Argentina", b: "Switzerland", sa: 3, sb: 1 },
-  // Semi-finals: France lost to Spain; England v Argentina still to play
+  // Semi-finals: France lost to Spain; Argentina beat England 2-1
   { stage: "Semi-final", a: "France", b: "Spain", sa: 0, sb: 2 },
-  { stage: "Semi-final", a: "England", b: "Argentina", sa: null, sb: null },
+  { stage: "Semi-final", a: "England", b: "Argentina", sa: 1, sb: 2 },
+  // Final: Argentina beat Spain 1-0 to win the 2026 World Cup
+  { stage: "Final", a: "Spain", b: "Argentina", sa: 0, sb: 1 },
 ];
 
 export function matchesFor(name: string): MatchRow[] {

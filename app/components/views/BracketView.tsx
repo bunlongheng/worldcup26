@@ -4,7 +4,7 @@ import { TEAM_BY_NAME } from "../../data/teams";
 
 type Match = { a: string; b: string; win?: "a" | "b" };
 
-// Actual knockout results (as of July 14, 2026). Semis are set; final is July 19.
+// Actual knockout results (as of July 19, 2026). Argentina beat Spain 1-0 in the final to win the title.
 const KO_ROUNDS: { name: string; matches: Match[] }[] = [
   {
     name: "Round of 16",
@@ -32,7 +32,7 @@ const KO_ROUNDS: { name: string; matches: Match[] }[] = [
     name: "Semi-finals",
     matches: [
       { a: "France", b: "Spain", win: "b" },
-      { a: "England", b: "Argentina" },
+      { a: "England", b: "Argentina", win: "b" },
     ],
   },
 ];
@@ -119,15 +119,19 @@ export default function BracketView() {
               <div className="rounded-md border border-[var(--border)] bg-white px-1 py-2 text-center shadow-sm sm:rounded-lg sm:px-2">
                 <div className="flex items-center justify-center gap-1.5">
                   {TEAM_BY_NAME["Spain"] && (
-                    <Flag code={TEAM_BY_NAME["Spain"].flag} name="Spain" className="h-3.5 w-5 shrink-0 sm:h-5 sm:w-7" />
+                    <Flag code={TEAM_BY_NAME["Spain"].flag} name="Spain" className="h-3.5 w-5 shrink-0 opacity-50 sm:h-5 sm:w-7" />
                   )}
-                  <span className="text-[9px] font-extrabold text-[var(--navy)] sm:text-[11px]">Spain</span>
+                  <span className="text-[9px] font-semibold text-[var(--muted)] sm:text-[11px]">Spain</span>
+                  <span className="text-[9px] font-semibold text-[var(--muted)] sm:text-[11px]">0</span>
                 </div>
                 <p className="my-1 text-[9px] text-[var(--muted)] sm:text-[10px]">vs</p>
-                <p className="text-[9px] font-semibold text-[var(--navy)] sm:text-[11px]">
-                  <span className="sm:hidden">SF2</span>
-                  <span className="hidden sm:inline">Winner SF2</span>
-                </p>
+                <div className="flex items-center justify-center gap-1.5">
+                  {TEAM_BY_NAME["Argentina"] && (
+                    <Flag code={TEAM_BY_NAME["Argentina"].flag} name="Argentina" className="h-3.5 w-5 shrink-0 sm:h-5 sm:w-7" />
+                  )}
+                  <span className="text-[9px] font-extrabold text-[var(--navy)] sm:text-[11px]">Argentina</span>
+                  <span className="text-[9px] font-extrabold text-[var(--gold)] sm:text-[11px]">1</span>
+                </div>
                 <p className="mt-2 text-[9px] text-[var(--muted)] sm:text-[10px]">July 19</p>
               </div>
             </div>
@@ -141,7 +145,12 @@ export default function BracketView() {
             </h4>
             <div className="grid place-items-center rounded-lg border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-1.5 py-3 sm:rounded-xl sm:px-5 sm:py-6">
               <Logo className="h-10 w-auto sm:h-16" />
-              <span className="mt-1 text-center text-sm font-extrabold text-[var(--navy)] sm:mt-2 sm:text-lg">TBD</span>
+              <div className="mt-1 flex items-center justify-center gap-1.5 sm:mt-2">
+                {TEAM_BY_NAME["Argentina"] && (
+                  <Flag code={TEAM_BY_NAME["Argentina"].flag} name="Argentina" className="h-4 w-6 shrink-0 sm:h-6 sm:w-9" />
+                )}
+                <span className="text-center text-sm font-extrabold text-[var(--navy)] sm:text-lg">Argentina</span>
+              </div>
               <span className="hidden text-[11px] text-[var(--muted)] sm:block">Crowned July 19</span>
             </div>
           </div>
