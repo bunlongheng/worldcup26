@@ -15,14 +15,16 @@ export const BALL = {
   smokeShakes: 3, // reversals to start smoking
   fireShakes: 6, // reversals to catch fire
   fireMultiplier: 5, // fire launches at Nx speed
+  goldenMultiplier: 3, // the golden final ball throws at Nx a normal ball
   maxParticles: 240, // hard cap on live particles
 } as const;
 
 export type Vec = { x: number; y: number };
 export type Sample = { t: number; x: number; y: number };
 
-/** Flick velocity (px/s) from recent pointer samples, with the fire boost + cap applied. */
-export function releaseVelocity(samples: Sample[], fire: boolean): Vec {
+/** Flick velocity (px/s) from recent pointer samples, with the fire boost, an
+    optional extra multiplier (e.g. the golden ball's 3x), and the cap applied. */
+export function releaseVelocity(samples: Sample[], fire: boolean, mult = 1): Vec {
   if (samples.length < 2) return { x: 0, y: 0 };
   const a = samples[0], b = samples[samples.length - 1];
   const span = (b.t - a.t) / 1000;
@@ -34,6 +36,11 @@ export function releaseVelocity(samples: Sample[], fire: boolean): Vec {
     vx *= BALL.fireMultiplier;
     vy *= BALL.fireMultiplier;
     cap = BALL.maxSpeed * BALL.fireMultiplier;
+  }
+  if (mult !== 1) {
+    vx *= mult;
+    vy *= mult;
+    cap *= mult;
   }
   const sp = Math.hypot(vx, vy);
   if (sp > cap) { vx *= cap / sp; vy *= cap / sp; }

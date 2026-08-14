@@ -2,6 +2,7 @@
   "name": "worldcup26",
   "version": "0.1.0",
   "private": true,
+  "engines": { "node": ">=22" },
   "scripts": {
     "dev": "next dev -p 3009",
     "build": "next build",
@@ -10,29 +11,30 @@
     "lint": "eslint .",
     "prepare": "husky",
     "test": "node --experimental-strip-types --test tests/data.test.ts tests/ballPhysics.test.ts tests/mapPicking.test.ts",
+    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage tests/data.test.ts tests/ballPhysics.test.ts tests/mapPicking.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
-    "next": "16.2.9",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
-    "@next/eslint-plugin-next": "^16.2.10",
-    "@playwright/test": "^1.61.1",
+    "@next/eslint-plugin-next": "^16.3.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.2.10",
+    "eslint-config-next": "^16.3.1",
     "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "typescript-eslint": "^8.64.0"
+    "typescript-eslint": "^8.67.0"
   },
   "overrides": {
     "postcss": ">=8.5.10"

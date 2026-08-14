@@ -8,11 +8,16 @@ import {
   GROUP_ACCENTS,
   HOST_STADIUMS,
   TEAM_BY_NAME,
+  groupStandings,
   matchesFor,
-  teamsByGroup,
+  matchOutcome,
   textOn,
   type Team,
 } from "../../data/teams";
+
+// Shared grid so the header labels line up with each team row.
+const STANDINGS_GRID =
+  "grid grid-cols-[1.1rem_auto_minmax(0,1fr)_1.1rem_1.1rem_1.1rem_1.1rem_1.6rem_1.7rem] items-center gap-x-1";
 
 const STAGE_SHORT: Record<string, string> = {
   "Round of 32": "R32",
@@ -49,32 +54,57 @@ export default function GroupsView() {
                 <span className="text-base font-extrabold tracking-wide">GROUP {letter}</span>
                 <span className="text-base font-extrabold opacity-70">{letter}</span>
               </div>
-              <ul className="divide-y divide-[var(--border)]">
-                {teamsByGroup(letter).map((t) => (
-                  <li key={t.name}>
-                    <button
-                      type="button"
-                      onClick={() => setDetail(t)}
-                      className="group flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-[var(--bg-2)]"
-                    >
-                      <Flag code={t.flag} name={t.name} className="h-5 w-8 shrink-0" />
-                      <span className="flex-1 text-sm font-medium text-[var(--navy)]">{t.name}</span>
-                      {t.host && (
-                        <span className="rounded-full bg-[var(--navy)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-                          Host
+              <div className="px-2 py-1.5">
+                <div className={`${STANDINGS_GRID} px-1 pb-1 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]`}>
+                  <span />
+                  <span />
+                  <span />
+                  <span className="text-center">P</span>
+                  <span className="text-center">W</span>
+                  <span className="text-center">D</span>
+                  <span className="text-center">L</span>
+                  <span className="text-center">GD</span>
+                  <span className="text-center">Pts</span>
+                </div>
+                <ul className="divide-y divide-[var(--border)]">
+                  {groupStandings(letter).map((s, i) => (
+                    <li key={s.team.name}>
+                      <button
+                        type="button"
+                        onClick={() => setDetail(s.team)}
+                        style={i < 2 ? { boxShadow: `inset 3px 0 0 ${accent}` } : undefined}
+                        aria-label={`${i + 1}. ${s.team.name}${s.team.host ? " (host nation)" : ""}: played ${s.p}, won ${s.w}, drawn ${s.d}, lost ${s.l}, goal difference ${s.gd}, ${s.pts} points`}
+                        className={`${STANDINGS_GRID} w-full rounded-sm px-1 py-1.5 text-left transition-colors hover:bg-[var(--bg-2)]`}
+                      >
+                        <span aria-hidden className="text-center text-[10px] font-bold tabular-nums text-[var(--muted)]">{i + 1}</span>
+                        <Flag code={s.team.flag} name={s.team.name} className="h-4 w-6 shrink-0" />
+                        <span aria-hidden className="flex min-w-0 items-center gap-1">
+                          <span className="truncate text-[13px] font-medium text-[var(--navy)]">{s.team.name}</span>
+                          {s.team.host && (
+                            <span title="Host nation" className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--gold)]" />
+                          )}
                         </span>
-                      )}
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-[var(--border)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--navy)]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                        <span aria-hidden className="text-center text-[11px] tabular-nums text-[var(--muted)]">{s.p}</span>
+                        <span aria-hidden className="text-center text-[11px] tabular-nums text-[var(--muted)]">{s.w}</span>
+                        <span aria-hidden className="text-center text-[11px] tabular-nums text-[var(--muted)]">{s.d}</span>
+                        <span aria-hidden className="text-center text-[11px] tabular-nums text-[var(--muted)]">{s.l}</span>
+                        <span aria-hidden className="text-center text-[11px] font-medium tabular-nums text-[var(--navy)]">
+                          {s.gd > 0 ? `+${s.gd}` : s.gd}
+                        </span>
+                        <span aria-hidden className="text-center text-[12px] font-extrabold tabular-nums text-[var(--navy)]">{s.pts}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           );
         })}
       </div>
+
+      <p className="mt-4 text-center text-xs text-[var(--muted)]">
+        The accent bar marks each group&apos;s top 2. They advance to the Round of 32 along with the 8 best third-placed teams.
+      </p>
 
       {detail && (
         <div
@@ -126,18 +156,7 @@ export default function GroupsView() {
                     const ts = isA ? m.sa : m.sb;
                     const os = isA ? m.sb : m.sa;
                     const oppTeam = TEAM_BY_NAME[opp];
-                    const result =
-                      ts == null || os == null
-                        ? "upcoming"
-                        : ts > os
-                          ? "won"
-                          : ts < os
-                            ? "lost"
-                            : m.pens
-                              ? isA
-                                ? "won"
-                                : "lost"
-                              : "draw";
+                    const result = matchOutcome(m, isA);
                     const rc =
                       result === "won"
                         ? "bg-[var(--green)]"
@@ -154,7 +173,7 @@ export default function GroupsView() {
                         </span>
                         <Flag code={detail.flag} name={detail.name} className="h-4 w-6 shrink-0" />
                         <span className="shrink-0 tabular-nums text-sm font-extrabold text-[var(--navy)]">
-                          {ts == null || os == null ? <span className="font-semibold text-[var(--muted)]">vs</span> : `${ts}–${os}`}
+                          {ts == null || os == null ? <span className="font-semibold text-[var(--muted)]">vs</span> : `${ts}-${os}`}
                         </span>
                         {oppTeam && <Flag code={oppTeam.flag} name={opp} className="h-4 w-6 shrink-0" />}
                         <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-[var(--navy)]">

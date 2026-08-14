@@ -8,6 +8,10 @@ import { useEffect, useRef } from "react";
    aria-modal="true" tabIndex={-1}). */
 export function useDialog<T extends HTMLElement>(open: boolean, onClose: () => void) {
   const ref = useRef<T>(null);
+  // Keep the latest onClose in a ref so callers can pass an inline arrow without the
+  // open/close lifecycle effect tearing down + re-trapping focus on every parent render.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
@@ -16,7 +20,7 @@ export function useDialog<T extends HTMLElement>(open: boolean, onClose: () => v
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !node) return;
@@ -40,6 +44,6 @@ export function useDialog<T extends HTMLElement>(open: boolean, onClose: () => v
       document.removeEventListener("keydown", onKey);
       opener?.focus(); // restore focus to whatever opened the dialog
     };
-  }, [open, onClose]);
+  }, [open]);
   return ref;
 }

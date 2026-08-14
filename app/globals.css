@@ -16,6 +16,7 @@
   --maroon: #8f2417;
   --lime: #c8e63c;
   --gold: #e9b949;
+  --gold-ink: #7a5c10; /* darker gold - WCAG AA (6.3:1) for gold text/headings on white */
 }
 
 @theme inline {
@@ -30,7 +31,6 @@
   --color-maroon: var(--maroon);
   --color-lime: var(--lime);
   --color-gold: var(--gold);
-  --font-display: var(--font-display);
   --font-body: var(--font-body);
 }
 
@@ -90,6 +90,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .reveal {
+    animation: none;
+    opacity: 1;
+  }
+  .sel-pulse {
     animation: none;
     opacity: 1;
   }

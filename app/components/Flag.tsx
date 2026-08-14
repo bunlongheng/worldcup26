@@ -18,7 +18,7 @@ export default function Flag({
         src={`https://flagcdn.com/w320/${code}.png`}
         alt={`${name} flag`}
         fill
-        sizes="72px"
+        sizes="(max-width: 640px) 64px, 128px"
         className="object-cover"
       />
     </span>

@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { Anton, Outfit } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import FloatingBall from "./components/FloatingBall";
-
-const anton = Anton({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400",
-});
 
 const outfit = Outfit({
   variable: "--font-body",
@@ -28,7 +22,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${anton.variable} ${outfit.variable} h-full antialiased`}
+      className={`${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}

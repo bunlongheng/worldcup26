@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Logo from "./Logo";
 import ThemeSong from "./ThemeSong";
@@ -30,6 +30,21 @@ const TABS: { id: View; label: string }[] = [
 /* App shell: logo + theme toggle on the left, view tabs on the right. */
 export default function WorldCupViews() {
   const [view, setView] = useState<View>("flags");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Arrow-key navigation for the tablist (WAI-ARIA roving tabindex, focus == activation).
+  const onTabKeyDown = (e: React.KeyboardEvent, i: number) => {
+    const last = TABS.length - 1;
+    let next = i;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = i === last ? 0 : i + 1;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = i === 0 ? last : i - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    else return;
+    e.preventDefault();
+    setView(TABS[next].id);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
@@ -47,14 +62,23 @@ export default function WorldCupViews() {
           <ThemeSong />
         </div>
 
-        <nav className="flex flex-nowrap gap-1 overflow-x-auto">
-          {TABS.map((tab) => {
+        <nav role="tablist" aria-label="World Cup views" className="flex flex-nowrap gap-1 overflow-x-auto">
+          {TABS.map((tab, i) => {
             const active = view === tab.id;
             return (
               <button
                 key={tab.id}
+                ref={(el) => {
+                  tabRefs.current[i] = el;
+                }}
                 type="button"
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-selected={active}
+                aria-controls="view-panel"
+                tabIndex={active ? 0 : -1}
                 onClick={() => setView(tab.id)}
+                onKeyDown={(e) => onTabKeyDown(e, i)}
                 className={`shrink-0 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] transition-colors sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.06em] ${
                   active
                     ? "border-[var(--navy)] bg-[var(--navy)] text-white"
@@ -68,7 +92,7 @@ export default function WorldCupViews() {
         </nav>
       </header>
 
-      <section className="py-4">
+      <section id="view-panel" role="tabpanel" aria-labelledby={`tab-${view}`} className="py-4">
         {view === "flags" && <FlagsView />}
         {view === "groups" && <GroupsView />}
         {view === "bracket" && <BracketView />}

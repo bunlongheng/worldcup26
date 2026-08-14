@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BALL, releaseVelocity, bounceAxis, shakeStep } from "./ballPhysics";
 
 /* A World Cup ball that floats above everything. Drag to grab, flick to throw -
@@ -15,7 +15,7 @@ import { BALL, releaseVelocity, bounceAxis, shakeStep } from "./ballPhysics";
 const { size: SIZE, drag: DRAG, restSpeed: REST_SPEED, smokeSpeed: SMOKE_SPEED,
   shakeWindow: SHAKE_WINDOW, fireMs: FIRE_MS } = BALL;
 
-type Particle = { x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; fire: boolean; shade: number };
+type Particle = { x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; fire: boolean; shade: number; glitter?: boolean; hue?: number };
 
 type St = {
   x: number; y: number; vx: number; vy: number; angle: number;
@@ -24,9 +24,13 @@ type St = {
   running: boolean; last: number; topInset: number;
   pmx: number; pmy: number; pmt: number; // previous pointer-move sample
   shakeSign: number; reversals: number; lastRev: number; fireUntil: number; fireArmed: boolean; smoldering: boolean;
+  taps: number; golden: boolean;
 };
 
 export default function FloatingBall() {
+  // Easter egg: tap the ball 10 times to swap its skin (with a glitter-rainbow
+  // burst + magic chime); 10 more taps swap it back - toggles endlessly.
+  const [skin, setSkin] = useState(false);
   const ballRef = useRef<HTMLDivElement>(null);
   const spinRef = useRef<HTMLDivElement>(null);
   const bobRef = useRef<HTMLDivElement>(null);
@@ -37,6 +41,7 @@ export default function FloatingBall() {
     x: 0, y: 0, vx: 0, vy: 0, angle: 0,
     dragging: false, grabX: 0, grabY: 0, samples: [], running: false, last: 0, topInset: 80,
     pmx: 0, pmy: 0, pmt: 0, shakeSign: 0, reversals: 0, lastRev: 0, fireUntil: 0, fireArmed: false, smoldering: false,
+    taps: 0, golden: false,
   });
 
   useEffect(() => {
@@ -98,6 +103,52 @@ export default function FloatingBall() {
       if (parts.current.length > BALL.maxParticles) parts.current.splice(0, parts.current.length - BALL.maxParticles);
     }
 
+    // magic swap: a rainbow shower of glitter radiating from the ball's centre
+    function glitterBurst() {
+      const cx = s.x + SIZE / 2, cy = s.y + SIZE / 2;
+      for (let i = 0; i < 70; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const spd = 40 + Math.random() * 170;
+        parts.current.push({
+          x: cx + (Math.random() - 0.5) * SIZE * 0.35,
+          y: cy + (Math.random() - 0.5) * SIZE * 0.35,
+          vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 30,
+          age: 0, life: 0.7 + Math.random() * 0.7,
+          size: 2.5 + Math.random() * 4, fire: false, shade: 0,
+          glitter: true, hue: Math.random() * 360,
+        });
+      }
+      if (parts.current.length > BALL.maxParticles) parts.current.splice(0, parts.current.length - BALL.maxParticles);
+    }
+
+    // a bright, shimmering ascending chime (synthesised - no asset needed)
+    function chime() {
+      try {
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ac = new AC();
+        const now = ac.currentTime;
+        [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = "triangle"; o.frequency.value = f;
+          const t0 = now + i * 0.075;
+          g.gain.setValueAtTime(0, t0);
+          g.gain.linearRampToValueAtTime(0.16, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+          o.connect(g); g.connect(ac.destination);
+          o.start(t0); o.stop(t0 + 0.55);
+        });
+        setTimeout(() => ac.close(), 1300);
+      } catch { /* WebAudio unavailable - swap silently */ }
+    }
+
+    function swapSkin() {
+      s.golden = !s.golden; // golden final ball throws at BALL.goldenMultiplier speed
+      setSkin(s.golden);
+      glitterBurst();
+      chime();
+      start();
+    }
+
     function drawParticles(dt: number, fireOn: boolean) {
       const { W, H } = bounds();
       ctx.clearRect(0, 0, W, H);
@@ -119,7 +170,23 @@ export default function FloatingBall() {
         p.vx *= 0.96; p.vy = p.vy * 0.96 - 14 * dt; // drift + buoyancy
         p.x += p.vx * dt; p.y += p.vy * dt;
         const t = p.age / p.life;
-        if (p.fire) {
+        if (p.glitter) {
+          // additive rainbow sparkle that twinkles as it fades
+          ctx.globalCompositeOperation = "lighter";
+          const tw = 0.55 + 0.45 * Math.sin(p.age * 22 + (p.hue ?? 0));
+          const a = (1 - t) * tw;
+          const hue = (p.hue ?? 0) + t * 70;
+          const r = p.size * (1 + t * 0.6);
+          ctx.fillStyle = `hsla(${hue},100%,66%,${a})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.283); ctx.fill();
+          // sparkle cross-glints
+          ctx.strokeStyle = `hsla(${hue},100%,85%,${a * 0.8})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x - r * 2.4, p.y); ctx.lineTo(p.x + r * 2.4, p.y);
+          ctx.moveTo(p.x, p.y - r * 2.4); ctx.lineTo(p.x, p.y + r * 2.4);
+          ctx.stroke();
+        } else if (p.fire) {
           // vivid opaque flames (source-over) so they read on the white page
           ctx.globalCompositeOperation = "source-over";
           const a = (1 - t) * 0.95;
@@ -175,10 +242,13 @@ export default function FloatingBall() {
       } else { stop(); }
     }
 
-    // ---- pointer (drag, shake, flick) ----
+    // ---- pointer (drag, shake, flick, tap) ----
+    // a tap = press + release with almost no travel (distinct from a throw/drag)
+    let downX = 0, downY = 0, movedFar = false;
     const onDown = (e: PointerEvent) => {
       e.preventDefault(); // selection is disabled app-wide in CSS
       s.dragging = true;
+      downX = e.clientX; downY = e.clientY; movedFar = false;
       s.grabX = e.clientX - s.x; s.grabY = e.clientY - s.y;
       s.samples = [{ t: performance.now(), x: e.clientX, y: e.clientY }];
       s.pmx = e.clientX; s.pmy = e.clientY; s.pmt = performance.now();
@@ -188,6 +258,7 @@ export default function FloatingBall() {
     };
     const onMove = (e: PointerEvent) => {
       if (!s.dragging) return;
+      if (!movedFar && Math.hypot(e.clientX - downX, e.clientY - downY) > 8) movedFar = true;
       const { W, H } = bounds();
       s.x = Math.max(0, Math.min(W - SIZE, e.clientX - s.grabX));
       s.y = Math.max(s.topInset, Math.min(H - SIZE, e.clientY - s.grabY));
@@ -218,10 +289,13 @@ export default function FloatingBall() {
       if (!s.dragging) return;
       s.dragging = false;
       try { ballRef.current?.releasePointerCapture(e.pointerId); } catch { /* already released */ }
-      const v = releaseVelocity(s.samples, s.fireArmed); // handles the 5x fire boost + speed cap
+      // golden ball throws 3x; fire boost + speed cap still handled inside
+      const v = releaseVelocity(s.samples, s.fireArmed, s.golden ? BALL.goldenMultiplier : 1);
       s.vx = v.x; s.vy = v.y;
       if (s.fireArmed && (v.x || v.y)) { s.fireUntil = performance.now() + FIRE_MS; s.smoldering = true; }
       s.samples = []; s.reversals = 0; s.shakeSign = 0;
+      // count taps; every 10th tap flips the ball skin with the magic effect
+      if (!movedFar) { s.taps += 1; if (s.taps % 10 === 0) swapSkin(); }
       start();
     };
     const onResize = () => {
@@ -263,7 +337,7 @@ export default function FloatingBall() {
       >
         <div ref={spinRef} style={{ width: SIZE, height: SIZE, willChange: "transform" }}>
           <div ref={bobRef} className="drop-shadow-[0_5px_9px_rgba(0,0,0,0.16)]">
-            <Image src="/ball.png" alt="" width={SIZE} height={SIZE} priority draggable={false} />
+            <Image src={skin ? "/ball-2026.webp" : "/ball.png"} alt="" width={SIZE} height={SIZE} draggable={false} />
           </div>
         </div>
       </div>

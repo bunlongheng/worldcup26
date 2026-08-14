@@ -31,33 +31,62 @@ const FLAT_H = 480; // 2:1 rectangle (equirectangular)
 
 const BY_ISO3 = teamsByIso3(TEAMS);
 
+// Loaded once per session, then reused - so switching Map <-> Globe tabs never refetches.
+let GEO_CACHE: Feature[] | null = null;
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export default function WorldMap({ mode }: { mode: Mode }) {
-  const [features, setFeatures] = useState<Feature[]>([]);
+  const [features, setFeatures] = useState<Feature[]>(GEO_CACHE ?? []);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(GEO_CACHE ? "ready" : "loading");
   const [rot, setRot] = useState<[number, number]>([-15, -18]);
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  // Auto-spin unless the user has asked the OS for reduced motion.
+  const [spinning, setSpinning] = useState(() => !prefersReducedMotion());
   const dragging = useRef(false);
   const moved = useRef(false);
   const last = useRef<[number, number] | null>(null);
-  const spin = useRef(true);
+  const pending = useRef<{ dx: number; dy: number } | null>(null);
+  const dragRaf = useRef(0);
 
   useEffect(() => {
-    fetch("/world.geojson")
-      .then((r) => r.json())
-      .then((g) => setFeatures(g.features))
-      .catch(() => setFeatures([]));
+    if (GEO_CACHE) {
+      setFeatures(GEO_CACHE);
+      setStatus("ready");
+      return;
+    }
+    const ctrl = new AbortController();
+    fetch("/world.geojson", { signal: ctrl.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error(`geojson ${r.status}`);
+        return r.json();
+      })
+      .then((g) => {
+        GEO_CACHE = g.features;
+        setFeatures(g.features);
+        setStatus("ready");
+      })
+      .catch((e) => {
+        if (e.name !== "AbortError") setStatus("error");
+      });
+    return () => ctrl.abort();
   }, []);
 
   useEffect(() => {
-    if (mode !== "globe") return;
+    // The loop exists only to auto-spin. Once the user drags/selects (spinning -> false)
+    // the effect tears down, so no rAF keeps firing after the spin is disabled.
+    if (mode !== "globe" || !spinning) return;
     let raf = 0;
     let prev = performance.now();
     let acc = 0; // cap state updates to ~25fps so we don't re-render 177 paths every frame
     const tick = (t: number) => {
       const dt = t - prev;
       prev = t;
-      if (spin.current && !dragging.current && !document.hidden) {
+      if (!dragging.current && !document.hidden) {
         acc += dt;
         if (acc >= 40) {
           const step = acc;
@@ -69,7 +98,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [mode]);
+  }, [mode, spinning]);
 
   const projection = useMemo(() => {
     if (mode === "globe") {
@@ -91,13 +120,33 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const graticule = useMemo(() => path(geoGraticule10()) ?? "", [path]);
   const sphere = useMemo(() => path(SPHERE) ?? "", [path]);
 
+  // Project every feature ONCE per projection change. Hover/selection only re-styles
+  // these cached path strings - it never re-runs geoPath over all 177 countries.
+  const geoPaths = useMemo(
+    () =>
+      features.map((f) => ({
+        a3: f.properties.a3,
+        d: path(f),
+        qualified: QUALIFIED.has(f.properties.a3),
+      })),
+    [features, path]
+  );
+
   const onDown = (e: React.PointerEvent) => {
     moved.current = false;
     if (mode !== "globe") return;
     dragging.current = true;
-    spin.current = false;
+    setSpinning(false);
     last.current = [e.clientX, e.clientY];
     (e.target as Element).setPointerCapture?.(e.pointerId);
+  };
+  // Coalesce rapid pointermoves into ONE re-projection per animation frame.
+  const flushDrag = () => {
+    dragRaf.current = 0;
+    const p = pending.current;
+    pending.current = null;
+    if (!p) return;
+    setRot((r) => [r[0] + p.dx * 0.3, Math.max(-89, Math.min(89, r[1] - p.dy * 0.3))]);
   };
   const onMove = (e: React.PointerEvent) => {
     if (mode !== "globe" || !dragging.current || !last.current) return;
@@ -105,23 +154,32 @@ export default function WorldMap({ mode }: { mode: Mode }) {
     const dy = e.clientY - last.current[1];
     if (Math.abs(dx) + Math.abs(dy) > 3) moved.current = true;
     last.current = [e.clientX, e.clientY];
-    setRot((r) => [r[0] + dx * 0.3, Math.max(-89, Math.min(89, r[1] - dy * 0.3))]);
+    const p = pending.current ?? { dx: 0, dy: 0 };
+    p.dx += dx;
+    p.dy += dy;
+    pending.current = p;
+    if (!dragRaf.current) dragRaf.current = requestAnimationFrame(flushDrag);
   };
   const onUp = () => {
     dragging.current = false;
     last.current = null;
+    if (dragRaf.current) {
+      cancelAnimationFrame(dragRaf.current);
+      dragRaf.current = 0;
+    }
+    flushDrag(); // apply the last coalesced delta instead of dropping it
   };
 
   const pick = (a3: string) => {
     if (moved.current) return; // ignore drag-release on the globe
     setSelected(a3);
     setSelectedGroup(null);
-    spin.current = false;
+    setSpinning(false);
   };
   const pickGroup = (letter: string) => {
     setSelectedGroup((g) => (g === letter ? null : letter));
     setSelected(null);
-    spin.current = false;
+    setSpinning(false);
   };
 
   const isGlobe = mode === "globe";
@@ -130,21 +188,50 @@ export default function WorldMap({ mode }: { mode: Mode }) {
   const sea = isGlobe ? "url(#ocean)" : "#161821";
   const landOff = "#2b2f38";
 
-  const qualified = features.filter((f) => QUALIFIED.has(f.properties.a3));
-  const others = features.filter((f) => !QUALIFIED.has(f.properties.a3));
+  const qualified = geoPaths.filter((p) => p.qualified);
+  const others = geoPaths.filter((p) => !p.qualified);
   const selectedTeams = selected ? BY_ISO3[selected] ?? [] : [];
-  const activeSet = activeIso3(selected, selectedGroup, qualified.map((f) => f.properties.a3), BY_ISO3);
+  const activeSet = activeIso3(selected, selectedGroup, qualified.map((p) => p.a3), BY_ISO3);
   const anySel = !!(selected || selectedGroup);
   const glowColor = (a3: string) => glowColorFor(a3, selectedGroup, BY_ISO3, GROUP_ACCENTS);
   const activeGroups = activeGroupLetters(selected, selectedGroup, BY_ISO3);
+  const labelFor = (a3: string) => {
+    const names = (BY_ISO3[a3] ?? []).map((t) => t.name).join(" / ");
+    const grp = BY_ISO3[a3]?.[0]?.group;
+    return `${names || a3}${grp ? `, group ${grp}` : ""}`;
+  };
 
   return (
     <div className="flex w-full min-w-0 flex-col overflow-x-hidden">
+      <div className="sr-only" role="status" aria-live="polite">
+        {selectedTeams.length
+          ? `Selected ${selectedTeams.map((t) => t.name).join(" and ")}`
+          : selectedGroup
+            ? `Selected group ${selectedGroup}`
+            : ""}
+      </div>
       <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1 overflow-hidden">
         <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
+          {status === "error" ? (
+            <div
+              role="alert"
+              className={`grid place-items-center rounded-2xl border border-[var(--border)] bg-[var(--bg-2)] p-8 text-center ${
+                isGlobe ? "h-[340px] w-[340px] sm:h-[520px] sm:w-[520px]" : "h-[190px] w-[320px] sm:h-[520px] sm:w-[960px]"
+              }`}
+            >
+              <div>
+                <p className="text-sm font-bold text-[var(--navy)]">Map failed to load</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  Could not fetch the country outlines. Check your connection and reload.
+                </p>
+              </div>
+            </div>
+          ) : (
           <svg
             viewBox={`0 0 ${W} ${H}`}
+            role="group"
+            aria-label={isGlobe ? "Interactive globe of the 48 qualified nations" : "Interactive world map of the 48 qualified nations"}
             className={`block max-w-full touch-none select-none ${
               isGlobe
                 ? "h-[340px] w-auto cursor-grab active:cursor-grabbing sm:h-[calc(100vh_-_230px)] sm:max-h-[820px]"
@@ -177,32 +264,45 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             <path d={graticule} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={0.5} />
 
             <g>
-              {others.map((f, i) => {
-                const d = path(f);
-                return d ? <path key={i} d={d} fill={landOff} stroke="rgba(255,255,255,0.06)" strokeWidth={0.4} /> : null;
-              })}
+              {others.map((p) =>
+                p.d ? <path key={p.a3} d={p.d} fill={landOff} stroke="rgba(255,255,255,0.06)" strokeWidth={0.4} /> : null
+              )}
             </g>
 
             <g filter="url(#pop)">
-              {qualified.map((f, i) => {
-                const d = path(f);
-                if (!d) return null;
-                const a3 = f.properties.a3;
+              {qualified.map((p) => {
+                if (!p.d) return null;
+                const a3 = p.a3;
                 const isHover = hovered === a3;
                 const grp = BY_ISO3[a3]?.[0]?.group;
                 const col = (grp && GROUP_ACCENTS[grp]) || "#2fa84f";
                 return (
                   <path
-                    key={i}
-                    d={d}
+                    key={a3}
+                    d={p.d}
                     fill={col}
                     fillOpacity={anySel && !activeSet.has(a3) ? 0.3 : isHover ? 0.85 : 1}
                     stroke={isHover ? "#14213d" : "#ffffff"}
                     strokeWidth={isHover ? 1.2 : 0.8}
-                    className="cursor-pointer"
+                    className="cursor-pointer focus:outline-none focus-visible:stroke-[#14213d]"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={labelFor(a3)}
                     onPointerEnter={() => setHovered(a3)}
                     onPointerLeave={() => setHovered(null)}
+                    onFocus={() => {
+                      setHovered(a3);
+                      setSpinning(false); // don't rotate a keyboard-focused country away
+                    }}
+                    onBlur={() => setHovered(null)}
                     onClick={() => pick(a3)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        moved.current = false;
+                        pick(a3);
+                      }
+                    }}
                     style={{ transition: "fill-opacity 0.2s" }}
                   />
                 );
@@ -211,15 +311,14 @@ export default function WorldMap({ mode }: { mode: Mode }) {
 
             {/* selected country/group pops: pulsing glow ring + bright fill on top */}
             {qualified
-              .filter((f) => activeSet.has(f.properties.a3))
-              .map((f, i) => {
-                const d = path(f);
-                if (!d) return null;
-                const c = glowColor(f.properties.a3);
+              .filter((p) => activeSet.has(p.a3))
+              .map((p) => {
+                if (!p.d) return null;
+                const c = glowColor(p.a3);
                 return (
-                  <g key={`sel-${i}`} className="pointer-events-none">
-                    <path d={d} fill="none" stroke={c} strokeWidth={5} filter="url(#sel-glow)" className="sel-pulse" />
-                    <path d={d} fill={c} stroke="#ffffff" strokeWidth={2.4} />
+                  <g key={`sel-${p.a3}`} className="pointer-events-none">
+                    <path d={p.d} fill="none" stroke={c} strokeWidth={5} filter="url(#sel-glow)" className="sel-pulse" />
+                    <path d={p.d} fill={c} stroke="#ffffff" strokeWidth={2.4} />
                   </g>
                 );
               })}
@@ -228,6 +327,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               <circle cx={W / 2} cy={H / 2} r={GLOBE / 2 - 6} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} className="pointer-events-none" />
             )}
           </svg>
+          )}
         </div>
         </div>
 
@@ -301,6 +401,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
               key={letter}
               type="button"
               onClick={() => pickGroup(letter)}
+              aria-label={`Group ${letter}`}
+              aria-pressed={activeGroups.has(letter)}
               className={`rounded-lg py-2.5 text-base font-extrabold transition-transform active:scale-95 sm:py-2 sm:text-lg ${
                 activeGroups.has(letter) ? "ring-2 ring-[var(--navy)] ring-offset-2" : "hover:brightness-95"
               }`}

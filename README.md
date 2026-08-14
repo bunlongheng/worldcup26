@@ -8,7 +8,7 @@ An interactive companion for the 2026 FIFA World Cup: all 48 qualified nations i
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-149eca?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)
-![Tests](https://img.shields.io/badge/tests-node%3Atest-6b4ea8)
+![Tests](https://img.shields.io/badge/tests-node%3Atest%20%2B%20playwright-6b4ea8)
 
 ## Contents
 
@@ -27,13 +27,13 @@ An interactive companion for the 2026 FIFA World Cup: all 48 qualified nations i
 - All 48 qualified nations with real flags, grouped by confederation with the three hosts first.
 - Five linked views - Flags, Groups, Bracket, Map, and Globe - switched instantly from the header, no page loads.
 - Color-coded groups: 12 groups in FIFA brand colors, with a Host badge on Canada, Mexico, and the USA.
-- Live knockout bracket - real results through the semi-finals, losers struck through, the final and champion still TBD.
+- Live knockout bracket, Round of 32 through the Final - topology-only pairings, with every score, winner, and the derived Champion (Argentina) computed live from the MATCHES data, losers struck through.
 - One d3-geo view renders both an equirectangular 2D map and a draggable 3D globe from a single 244KB geojson.
 - Tap a country or a group letter to highlight it with a glow and open the side panel; drag to spin the globe.
 - Country detail modal: flag, group, confederation, capital, continent, population, area, currency, and every match with its real score (W / L / D).
 - Host nations open their full stadium list (16 venues) inside the same modal.
 - A physics-driven floating ball on every page: drag to grab, flick to throw, and it ricochets off the window edges with real velocity-based bounces (see below).
-- Official theme audio, loaded lazily and toggled from the header - nothing downloads until you press play.
+- Official theme audio, loaded lazily and toggled from the header - nothing downloads until the first pointer tap (or the Sound toggle button) starts it.
 - Fully responsive from phone to desktop with no horizontal scroll; real FIFA 26 emblem as favicon and iOS icon.
 
 ### The floating ball
@@ -46,6 +46,8 @@ A World Cup ball floats above every page (`FloatingBall.tsx`) with a small physi
 - It stays above modals but never covers the header, and the smoke/fire canvas is `pointer-events: none` so it never blocks a tap.
 
 The bug-prone math (release velocity, wall bounce, shake detection) is isolated in `ballPhysics.ts` and unit-tested.
+
+Tap the ball 10 times for a hidden golden-ball skin swap (glitter burst + chime); 10 more taps swaps it back.
 
 ### The five views
 
@@ -95,7 +97,7 @@ One data module, one direction of flow:
 |-------|-------|------|
 | Shell | `app/page.tsx`, `app/components/WorldCupViews.tsx` | Static server page mounts the client app-shell (header, tabs, view switch) |
 | Views | `app/components/views/*`, `app/components/WorldMap.tsx` | Flags, Groups, Bracket (pure) + the lazy d3-geo Map/Globe |
-| Data | `app/data/teams.ts` | Single source: 48 teams, 12 groups, 102 matches, 16 stadiums, country stats + lookups (`TEAM_BY_NAME`, `matchesFor`) |
+| Data | `app/data/teams.ts` | Single source: 48 teams, 12 groups, 103 matches, 16 stadiums, country stats + lookups (`TEAM_BY_NAME`, `matchesFor`) |
 | Leaf | `Flag`, `Logo`, `ThemeSong`, `CountryCard` | Small presentational pieces reused across views |
 | Overlay | `FloatingBall.tsx` + `ballPhysics.ts` | Physics ball + canvas smoke/fire, mounted once in the root layout; pure math split out and tested |
 | Assets | `public/world.geojson`, `public/theme.mp3` | Slimmed Natural Earth geometry + the theme clip |
@@ -112,7 +114,7 @@ The whole app optimizes for one thing: a fast, offline-friendly, zero-backend to
 | Rendering | Fully static (no SSR, no API) | Server components with data fetch | Deploys to any static or edge host, instant TTFB, nothing to run | No personalization or live-updating scores |
 | Map + globe | One d3-geo component, two projections | Mapbox / Leaflet / vector tiles | No API key, no tile server; one 244KB geojson drives both 2D and 3D | Hand-rolled interaction, no deep zoom or pan |
 | Flags | flagcdn via `next/image` | Bundle 48 SVGs in the repo | Crisp at any size, optimized and cached by the image pipeline, tiny repo | A runtime dependency on a third-party host |
-| Theme audio | Native `<audio>`, `preload="none"` | Autoplay / eager preload | ~2MB is fetched only on a user gesture; the page stays light | Manual play; the clip is the heaviest asset |
+| Theme audio | Native `<audio>`, `preload="none"` | Autoplay / eager preload | ~751KB is fetched only on a user gesture; the page stays light | Manual play; the clip is the heaviest asset |
 | View state | Local `useState` switch | A route segment per view | One-page instant switching, no navigation cost | Views are not individually deep-linkable |
 
 ## Tech stack
@@ -122,7 +124,7 @@ The whole app optimizes for one thing: a fast, offline-friendly, zero-backend to
 - Tailwind CSS v4
 - d3-geo - `geoOrthographic` globe + `geoEquirectangular` map, over Natural Earth 110m geometry
 - flag images from [flagcdn.com](https://flagcdn.com) through `next/image`
-- node:test data-integrity tests, ESLint 9 flat config, GitHub Actions CI
+- node:test unit tests (28) + Playwright e2e (4), ESLint 9 flat config, GitHub Actions CI
 - Hosted on Vercel
 
 ## Quick start
@@ -143,12 +145,17 @@ No environment variables required.
 ## Testing
 
 ```bash
-npm test        # node:test data-integrity assertions over app/data/teams.ts
-npm run lint    # ESLint 9 flat config
+npm test          # 28 unit tests (node:test) - data invariants, ball physics, map picking
+npm run test:e2e  # 4 e2e tests x 2 viewports (desktop + mobile)
+npm run lint      # ESLint 9 flat config
 npm run typecheck
 ```
 
-The tests lock the core invariants - 48 unique teams, 12 groups of 4, 3 hosts, 16 stadiums, and every match referencing a real team. The same three checks plus `npm run build` run on every push in GitHub Actions.
+`npm test` runs 28 pure-logic and data-invariant unit tests via `node --test`, across 3 files: `tests/data.test.ts` locks the core data invariants - 48 unique teams, 12 groups of 4, 3 hosts, 16 stadiums, and every match referencing a real team; `tests/ballPhysics.test.ts` covers the floating ball's release-velocity, bounce, and shake math; `tests/mapPicking.test.ts` covers the map/globe country and group highlight logic.
+
+`npm run test:e2e` runs 4 e2e tests x 2 viewports (desktop + mobile) - `e2e/app.spec.ts` against Desktop Chromium and a Pixel 5 mobile project, 8 runs total: (1) loads all 5 views and opens a country modal, asserting real per-view content along the way - group standings in Groups, the derived Champion in Bracket, a knockout score, and the map/globe SVG rendering; (2) tapping a group filter on the map highlights that group; (3) a country modal traps focus inside it and closes on Escape; (4) the view tablist is navigable with arrow keys.
+
+GitHub Actions runs both on every push - typecheck, lint, `npm test`, `npm run build`, then the Playwright e2e suite.
 
 ## Project layout
 
@@ -162,8 +169,10 @@ app/
   components/
     WorldCupViews.tsx      app shell: header, tabs, view switch
     WorldMap.tsx           d3-geo 2D map + 3D globe (lazy, client)
+    mapPicking.ts          pure, tested map/globe highlight logic
     FloatingBall.tsx       physics ball + canvas smoke/fire (above all pages)
     ballPhysics.ts         pure, tested ball math (velocity, bounce, shake)
+    useDialog.ts           focus-trap + Escape-to-close hook for modals
     Flag.tsx               next/image flag
     Logo.tsx               FIFA 26 emblem
     ThemeSong.tsx          lazy theme-audio toggle
@@ -176,11 +185,15 @@ public/
   world.geojson            Natural Earth 110m geometry (244KB)
   theme.mp3                official theme clip
   ball.png                 the floating World Cup ball sprite
+  ball-2026.webp           golden-ball skin, easter egg (tap the ball 10x)
   wc26-logo.png            emblem
 tests/
   data.test.ts             data-integrity assertions
   ballPhysics.test.ts      ball physics assertions
-.github/workflows/ci.yml   typecheck, lint, test, build
+  mapPicking.test.ts       map/globe highlight-logic assertions
+e2e/
+  app.spec.ts              Playwright: all 5 views + modal focus-trap + Escape
+.github/workflows/ci.yml   typecheck, lint, test, build, e2e
 ```
 
 ## License

@@ -53,7 +53,7 @@ export default function FlagsView() {
             aria-modal="true"
             aria-label={`${open.name} details`}
             tabIndex={-1}
-            className="reveal relative w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl outline-none"
+            className="reveal relative max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             <button

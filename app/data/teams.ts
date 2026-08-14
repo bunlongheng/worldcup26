@@ -96,14 +96,21 @@ export const GROUP_ACCENTS: Record<string, string> = {
   I: "#158f7e", J: "#5a78e6", K: "#86b93a", L: "#c62e2e",
 };
 
-// pick readable text (dark or white) for a given brand color
+// Pick the text color (black or white) with the HIGHER WCAG contrast ratio against
+// a given brand color - so mid-tone accents get black text instead of low-contrast white.
 export function textOn(hex: string): string {
   const h = hex.replace("#", "");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-  return lum > 150 ? "#0b0b0b" : "#ffffff";
+  const toLin = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const L =
+    0.2126 * toLin(parseInt(h.slice(0, 2), 16)) +
+    0.7152 * toLin(parseInt(h.slice(2, 4), 16)) +
+    0.0722 * toLin(parseInt(h.slice(4, 6), 16));
+  const onWhite = 1.05 / (L + 0.05); // contrast of white text
+  const onBlack = (L + 0.05) / 0.05; // contrast of black text
+  return onWhite >= onBlack ? "#ffffff" : "#0b0b0b";
 }
 
 export type Info = {
@@ -321,6 +328,18 @@ export function matchesFor(name: string): MatchRow[] {
   return MATCHES.filter((m) => m.a === name || m.b === name);
 }
 
+// Result of a match from one team's perspective (works for group + knockout rows).
+// The single home of the "shootout winner is the a-side" rule.
+export function matchOutcome(m: MatchRow, teamIsA: boolean): "won" | "lost" | "draw" | "upcoming" {
+  if (m.sa == null || m.sb == null) return "upcoming";
+  const ts = teamIsA ? m.sa : m.sb;
+  const os = teamIsA ? m.sb : m.sa;
+  if (ts > os) return "won";
+  if (ts < os) return "lost";
+  if (m.pens) return teamIsA ? "won" : "lost";
+  return "draw";
+}
+
 export const TEAM_BY_NAME: Record<string, Team> = TEAMS.reduce(
   (acc, t) => ((acc[t.name] = t), acc),
   {} as Record<string, Team>
@@ -329,5 +348,150 @@ export const TEAM_BY_NAME: Record<string, Team> = TEAMS.reduce(
 export function teamsByGroup(letter: string): Team[] {
   return TEAMS.filter((t) => t.group === letter);
 }
+
+// Group standings computed from the group-stage results: P W D L GF GA GD Pts,
+// sorted by points, then goal difference, then goals for, then name.
+export type Standing = {
+  team: Team;
+  p: number;
+  w: number;
+  d: number;
+  l: number;
+  gf: number;
+  ga: number;
+  gd: number;
+  pts: number;
+};
+
+export function groupStandings(letter: string): Standing[] {
+  const rows = new Map<string, Standing>(
+    teamsByGroup(letter).map((team) => [
+      team.name,
+      { team, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+    ])
+  );
+  for (const m of MATCHES) {
+    if (m.stage !== `Group ${letter}` || m.sa == null || m.sb == null) continue;
+    const ra = rows.get(m.a);
+    const rb = rows.get(m.b);
+    if (!ra || !rb) continue;
+    ra.p++;
+    rb.p++;
+    ra.gf += m.sa;
+    ra.ga += m.sb;
+    rb.gf += m.sb;
+    rb.ga += m.sa;
+    if (m.sa > m.sb) {
+      ra.w++;
+      ra.pts += 3;
+      rb.l++;
+    } else if (m.sa < m.sb) {
+      rb.w++;
+      rb.pts += 3;
+      ra.l++;
+    } else {
+      ra.d++;
+      rb.d++;
+      ra.pts++;
+      rb.pts++;
+    }
+  }
+  const table = [...rows.values()];
+  for (const r of table) r.gd = r.gf - r.ga;
+  return table.sort(
+    (x, y) =>
+      y.pts - x.pts || y.gd - x.gd || y.gf - x.gf || x.team.name.localeCompare(y.team.name)
+  );
+}
+
+// Knockout score for an unordered pair, oriented to (a, b), plus the winner ("a" |
+// "b") relative to that orientation. The pens winner is always the MATCHES `a` side,
+// so `win` accounts for whether the pair was passed in swapped order.
+export function koResult(
+  a: string,
+  b: string
+): { sa: number | null; sb: number | null; pens?: string; win: "a" | "b" | null } | null {
+  const m = MATCHES.find(
+    (r) =>
+      !r.stage.startsWith("Group") &&
+      ((r.a === a && r.b === b) || (r.a === b && r.b === a))
+  );
+  if (!m) return null;
+  const straight = m.a === a;
+  const sa = straight ? m.sa : m.sb;
+  const sb = straight ? m.sb : m.sa;
+  // Reuse matchOutcome (the single home of the shootout rule) instead of re-deriving it.
+  const outcome = matchOutcome(m, straight);
+  const win = outcome === "won" ? "a" : outcome === "lost" ? "b" : null;
+  return { sa, sb, pens: m.pens, win };
+}
+
+// Winner name of a knockout pairing, or null if the pair has not been played / found.
+export function koWinner(a: string, b: string): string | null {
+  const r = koResult(a, b);
+  if (!r || !r.win) return null;
+  return r.win === "a" ? a : b;
+}
+
+// Knockout bracket TOPOLOGY only (who meets whom, in tree order). No outcomes are stored
+// here - every score/winner/final/champion is derived from MATCHES via koResult/koWinner.
+// Kept beside MATCHES so a test can assert the two never drift (see tests/data.test.ts).
+export type KnockoutRound = { name: string; short: string; matches: { a: string; b: string }[] };
+export const KNOCKOUT_TOPOLOGY: KnockoutRound[] = [
+  {
+    name: "Round of 32",
+    short: "R32",
+    matches: [
+      { a: "France", b: "Sweden" },
+      { a: "Paraguay", b: "Germany" },
+      { a: "Morocco", b: "Netherlands" },
+      { a: "Canada", b: "South Africa" },
+      { a: "Spain", b: "Austria" },
+      { a: "Portugal", b: "Croatia" },
+      { a: "Belgium", b: "Senegal" },
+      { a: "United States", b: "Bosnia & Herzegovina" },
+      { a: "England", b: "DR Congo" },
+      { a: "Mexico", b: "Ecuador" },
+      { a: "Norway", b: "Côte d'Ivoire" },
+      { a: "Brazil", b: "Japan" },
+      { a: "Argentina", b: "Cabo Verde" },
+      { a: "Egypt", b: "Australia" },
+      { a: "Switzerland", b: "Algeria" },
+      { a: "Colombia", b: "Ghana" },
+    ],
+  },
+  {
+    name: "Round of 16",
+    short: "R16",
+    matches: [
+      { a: "France", b: "Paraguay" },
+      { a: "Morocco", b: "Canada" },
+      { a: "Spain", b: "Portugal" },
+      { a: "Belgium", b: "United States" },
+      { a: "England", b: "Mexico" },
+      { a: "Norway", b: "Brazil" },
+      { a: "Argentina", b: "Egypt" },
+      { a: "Switzerland", b: "Colombia" },
+    ],
+  },
+  {
+    name: "Quarter-finals",
+    short: "QF",
+    matches: [
+      { a: "France", b: "Morocco" },
+      { a: "Spain", b: "Belgium" },
+      { a: "England", b: "Norway" },
+      { a: "Argentina", b: "Switzerland" },
+    ],
+  },
+  {
+    name: "Semi-finals",
+    short: "SF",
+    matches: [
+      { a: "France", b: "Spain" },
+      { a: "England", b: "Argentina" },
+    ],
+  },
+];
 
 export const QUALIFIED_ISO3 = Array.from(new Set(TEAMS.map((t) => t.iso3)));

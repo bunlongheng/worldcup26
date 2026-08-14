@@ -31,6 +31,16 @@ test("releaseVelocity: fire multiplies speed and raises the cap", () => {
   assert.equal(Math.round(Math.hypot(hard.x, hard.y)), BALL.maxSpeed * BALL.fireMultiplier);
 });
 
+test("releaseVelocity: the golden multiplier scales the throw and raises the cap", () => {
+  const samples = [{ t: 0, x: 0, y: 0 }, { t: 100, x: 100, y: 0 }]; // 1000 px/s
+  const normal = releaseVelocity(samples, false);
+  const golden = releaseVelocity(samples, false, BALL.goldenMultiplier);
+  assert.equal(Math.round(golden.x / normal.x), BALL.goldenMultiplier);
+  // a hard golden flick is capped at maxSpeed * goldenMultiplier, not maxSpeed
+  const hard = releaseVelocity([{ t: 0, x: 0, y: 0 }, { t: 100, x: 100000, y: 0 }], false, BALL.goldenMultiplier);
+  assert.equal(Math.round(Math.hypot(hard.x, hard.y)), BALL.maxSpeed * BALL.goldenMultiplier);
+});
+
 test("bounceAxis: reflects off both edges with energy loss, else unchanged", () => {
   const lo = bounceAxis(-10, -300, 500);
   assert.equal(lo.p, 0);

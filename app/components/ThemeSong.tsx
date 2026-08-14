@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 // Official WC26 theme song, served as a local audio file (reliable, unlike the
 // YouTube embed). Browsers block sound-on-load until a gesture, so it also starts
-// on the first tap. The pill toggles it.
+// on the first pointer tap. The pill toggles it. We intentionally do NOT hook the
+// first keystroke - that would hijack Tab/typing and fight keyboard navigation.
 const VOLUME = 0.22; // 0..1, low background level
 
 export default function ThemeSong() {
@@ -22,12 +23,15 @@ export default function ThemeSong() {
     };
     tryPlay();
 
-    const kick = () => tryPlay();
+    const kick = (e: PointerEvent) => {
+      // If the first tap IS the Sound button, let its own onClick handle it - otherwise
+      // the auto-start here and the button's toggle cancel out (starts then pauses).
+      if ((e.target as Element | null)?.closest?.("[data-theme-toggle]")) return;
+      tryPlay();
+    };
     window.addEventListener("pointerdown", kick, { once: true });
-    window.addEventListener("keydown", kick, { once: true });
     return () => {
       window.removeEventListener("pointerdown", kick);
-      window.removeEventListener("keydown", kick);
     };
   }, []);
 
@@ -55,6 +59,7 @@ export default function ThemeSong() {
 
       <button
         type="button"
+        data-theme-toggle
         onClick={toggle}
         aria-pressed={playing}
         title={playing ? "Sound on - tap to mute" : "Play the theme song"}
