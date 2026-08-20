@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { setSoundOn } from "./soundState";
 
 // Official WC26 theme song, served as a local audio file (reliable, unlike the
 // YouTube embed). Browsers block sound-on-load until a gesture, so it also starts
@@ -53,8 +54,14 @@ export default function ThemeSong() {
         src="/theme.mp3"
         loop
         preload="none"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPlay={() => {
+          setPlaying(true);
+          setSoundOn(true);
+        }}
+        onPause={() => {
+          setPlaying(false);
+          setSoundOn(false);
+        }}
       />
 
       <button
