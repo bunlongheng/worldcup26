@@ -25,12 +25,14 @@ An interactive companion for the 2026 FIFA World Cup: all 48 qualified nations i
 ## Features
 
 - All 48 qualified nations with real flags, grouped by confederation with the three hosts first.
-- Five linked views - Flags, Groups, Bracket, Map, and Globe - switched instantly from the header, no page loads.
+- Seven linked views - Flags, Groups, Bracket, Rank, Players, Map, and Globe - switched instantly from the header, no page loads.
 - Color-coded groups: 12 groups in FIFA brand colors, with a Host badge on Canada, Mexico, and the USA.
-- Live knockout bracket, Round of 32 through the Final - topology-only pairings, with every score, winner, and the derived Champion (Argentina) computed live from the MATCHES data, losers struck through.
+- Live knockout bracket, Round of 32 through the Final - topology-only pairings, with every score, winner, and the derived Champion (Spain) computed live from the MATCHES data, losers struck through. Tap any team in the bracket to open its country modal (name spoken aloud, flag blurred behind).
+- Final ranking (1-48) in the Rank view: the medal places come from the Final and the third-place playoff, everyone else is bucketed by how far they went then by overall record - all derived live from MATCHES.
+- Players view: browse each nation's squad with real photos (via TheSportsDB, downloaded locally), plus a "guess the nation" player quiz. 47 of 48 squads (Jordan is absent from the free data source).
 - One d3-geo view renders both an equirectangular 2D map and a draggable 3D globe from a single 244KB geojson.
 - Tap a country or a group letter to highlight it with a glow and open the side panel; drag to spin the globe.
-- Country detail modal: flag, group, confederation, capital, continent, population, area, currency, and every match with its real score (W / L / D).
+- Country detail modal: flag, group, confederation, capital, continent, population, area, currency, and every match with its real score (W / L / D). Opening any country modal speaks its name aloud and blurs its flag behind the card.
 - Host nations open their full stadium list (16 venues) inside the same modal.
 - A physics-driven floating ball on every page: drag to grab, flick to throw, and it ricochets off the window edges with real velocity-based bounces (see below).
 - Official theme audio, loaded lazily and toggled from the header - nothing downloads until the first pointer tap (or the Sound toggle button) starts it.

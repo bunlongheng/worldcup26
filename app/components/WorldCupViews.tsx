@@ -7,6 +7,8 @@ import ThemeSong from "./ThemeSong";
 import FlagsView from "./views/FlagsView";
 import GroupsView from "./views/GroupsView";
 import BracketView from "./views/BracketView";
+import RankView from "./views/RankView";
+import PlayersView from "./views/PlayersView";
 
 const WorldMap = dynamic(() => import("./WorldMap"), {
   ssr: false,
@@ -17,12 +19,14 @@ const WorldMap = dynamic(() => import("./WorldMap"), {
   ),
 });
 
-type View = "flags" | "groups" | "bracket" | "map" | "globe";
+type View = "flags" | "groups" | "bracket" | "rank" | "players" | "map" | "globe";
 
 const TABS: { id: View; label: string }[] = [
   { id: "flags", label: "Flags" },
   { id: "groups", label: "Groups" },
   { id: "bracket", label: "Bracket" },
+  { id: "rank", label: "Rank" },
+  { id: "players", label: "Players" },
   { id: "map", label: "Map" },
   { id: "globe", label: "Globe" },
 ];
@@ -96,6 +100,8 @@ export default function WorldCupViews() {
         {view === "flags" && <FlagsView />}
         {view === "groups" && <GroupsView />}
         {view === "bracket" && <BracketView />}
+        {view === "rank" && <RankView />}
+        {view === "players" && <PlayersView />}
         {view === "map" && <WorldMap mode="flat" />}
         {view === "globe" && <WorldMap mode="globe" />}
       </section>

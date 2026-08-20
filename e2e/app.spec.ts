@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("loads all five views and opens a country modal", async ({ page }) => {
+test("loads all seven views and opens a country modal", async ({ page }) => {
   await page.goto("/");
   // default Flags view
   await expect(page.getByRole("button", { name: "France" }).first()).toBeVisible();
@@ -10,10 +10,20 @@ test("loads all five views and opens a country modal", async ({ page }) => {
   await expect(page.getByText("GROUP A")).toBeVisible();
   await expect(page.getByRole("button", { name: /Mexico/ }).first()).toBeVisible();
 
-  // Bracket: derived champion block renders and names Argentina (visible on all sizes)
+  // Bracket: derived champion block renders and names Spain (visible on all sizes)
   await page.getByRole("tab", { name: "Bracket", exact: true }).click();
   await expect(page.getByText("Crowned July 19")).toBeVisible();
-  await expect(page.getByText("Argentina", { exact: true }).last()).toBeVisible();
+  await expect(page.getByText("Spain", { exact: true }).last()).toBeVisible();
+
+  // Rank: 1-48 leaderboard, Spain #1 champion and England the bronze via the playoff
+  await page.getByRole("tab", { name: "Rank", exact: true }).click();
+  await expect(page.getByRole("button", { name: /Rank 1, Spain, Champion/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Rank 3, England, Third place/ })).toBeVisible();
+
+  // Players: squads grid renders and the quiz toggle is present
+  await page.getByRole("tab", { name: "Players", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Player quiz" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Argentina/ }).first()).toBeVisible();
 
   // Map + Globe: the interactive SVG renders
   await page.getByRole("tab", { name: "Map", exact: true }).click();

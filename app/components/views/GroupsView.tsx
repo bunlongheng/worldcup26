@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Flag from "../Flag";
-import { useDialog } from "../useDialog";
+import CountryModal from "../CountryModal";
 import {
   GROUP_LETTERS,
   GROUP_ACCENTS,
@@ -32,8 +32,6 @@ const shortStage = (s: string) =>
 /* Groups grid - tap a team for its full match center, hosts also list stadiums. */
 export default function GroupsView() {
   const [detail, setDetail] = useState<Team | null>(null);
-
-  const dialogRef = useDialog<HTMLDivElement>(!!detail, () => setDetail(null));
 
   const results = detail ? matchesFor(detail.name) : [];
 
@@ -107,30 +105,7 @@ export default function GroupsView() {
       </p>
 
       {detail && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,15,25,0.55)] p-4 backdrop-blur-md"
-          onClick={() => setDetail(null)}
-        >
-          <div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${detail.name} matches`}
-            tabIndex={-1}
-            className="reveal relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white p-7 shadow-2xl outline-none"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setDetail(null)}
-              aria-label="Close"
-              className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-colors hover:border-[var(--navy)] hover:text-[var(--navy)]"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
-
+        <CountryModal team={detail} onClose={() => setDetail(null)} label={`${detail.name} matches`}>
             <div className="flex flex-col items-center text-center">
               <Flag code={detail.flag} name={detail.name} className="h-[86px] w-[128px]" />
               <span className="mt-3 text-2xl font-extrabold text-[var(--navy)]">{detail.name}</span>
@@ -215,8 +190,7 @@ export default function GroupsView() {
                 </>
               )}
             </div>
-          </div>
-        </div>
+        </CountryModal>
       )}
     </>
   );

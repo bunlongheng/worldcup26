@@ -199,7 +199,7 @@ export const HOST_STADIUMS: Record<string, { city: string; stadium: string }[]> 
   ],
 };
 
-// Every match (group stage + knockouts) with real scores. Argentina won the final 1-0.
+// Every match (group stage + knockouts) with real scores. Spain won the final 2-1.
 export type MatchRow = { stage: string; a: string; b: string; sa: number | null; sb: number | null; pens?: string };
 export const MATCHES: MatchRow[] = [
   // Group A
@@ -320,8 +320,10 @@ export const MATCHES: MatchRow[] = [
   // Semi-finals: France lost to Spain; Argentina beat England 2-1
   { stage: "Semi-final", a: "France", b: "Spain", sa: 0, sb: 2 },
   { stage: "Semi-final", a: "England", b: "Argentina", sa: 1, sb: 2 },
-  // Final: Argentina beat Spain 1-0 to win the 2026 World Cup
-  { stage: "Final", a: "Spain", b: "Argentina", sa: 0, sb: 1 },
+  // Third-place playoff: England beat France 2-1 for the bronze
+  { stage: "Third place", a: "England", b: "France", sa: 2, sb: 1 },
+  // Final: Spain beat Argentina 2-1 to win the 2026 World Cup
+  { stage: "Final", a: "Spain", b: "Argentina", sa: 2, sb: 1 },
 ];
 
 export function matchesFor(name: string): MatchRow[] {
@@ -493,5 +495,76 @@ export const KNOCKOUT_TOPOLOGY: KnockoutRound[] = [
     ],
   },
 ];
+
+// Final tournament classification (1..48), derived entirely from MATCHES. The medal
+// places (1-4) come straight from the Final and the third-place playoff; everyone
+// else is bucketed by how far they went, then ranked within a bucket by their overall
+// record (pts, GD, GF, name). Nothing is stored - flip a score and the table below
+// re-sorts itself (guarded by a test).
+export type Ranked = Standing & { rank: number; roundOut: string };
+
+// Furthest stage a team can be ELIMINATED in, before the medal matches take over.
+const ELIM_STAGES = ["Group", "Round of 32", "Round of 16", "Quarter-final"];
+const ELIM_LABEL = ["Group stage", "Round of 32", "Round of 16", "Quarter-final"];
+const elimRank = (stage: string) => (stage.startsWith("Group") ? 0 : ELIM_STAGES.indexOf(stage));
+// Winner/loser of a two-team match row, by name.
+const loserOf = (m: MatchRow | undefined) =>
+  m ? (koWinner(m.a, m.b) === m.a ? m.b : m.a) : null;
+
+export function finalRanking(): Ranked[] {
+  const agg = new Map<string, Standing>(
+    TEAMS.map((team) => [team.name, { team, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0 }])
+  );
+  const furthest = new Map<string, number>(TEAMS.map((t) => [t.name, 0]));
+  for (const m of MATCHES) {
+    if (m.sa == null || m.sb == null) continue;
+    const si = elimRank(m.stage); // medal-round stages map to -1 and never raise `furthest`
+    for (const [name, isA] of [[m.a, true], [m.b, false]] as [string, boolean][]) {
+      const r = agg.get(name);
+      if (!r) continue;
+      r.p++;
+      r.gf += isA ? m.sa : m.sb;
+      r.ga += isA ? m.sb : m.sa;
+      const o = matchOutcome(m, isA);
+      if (o === "won") {
+        r.w++;
+        r.pts += 3;
+      } else if (o === "lost") {
+        r.l++;
+      } else {
+        r.d++;
+        r.pts += 1;
+      }
+      if (si > (furthest.get(name) ?? 0)) furthest.set(name, si);
+    }
+  }
+  const finalRow = MATCHES.find((m) => m.stage === "Final");
+  const thirdRow = MATCHES.find((m) => m.stage === "Third place");
+  const medal: Record<string, { bucket: number; label: string }> = {};
+  const seat = (name: string | null, bucket: number, label: string) => {
+    if (name) medal[name] = { bucket, label };
+  };
+  seat(finalRow ? koWinner(finalRow.a, finalRow.b) : null, 0, "Champion");
+  seat(loserOf(finalRow), 1, "Runner-up");
+  seat(thirdRow ? koWinner(thirdRow.a, thirdRow.b) : null, 2, "Third place");
+  seat(loserOf(thirdRow), 3, "Fourth place");
+
+  const bucketOf = (name: string) => medal[name]?.bucket ?? 4 + (3 - (furthest.get(name) ?? 0));
+  const rows = [...agg.values()];
+  for (const r of rows) r.gd = r.gf - r.ga;
+  rows.sort(
+    (x, y) =>
+      bucketOf(x.team.name) - bucketOf(y.team.name) ||
+      y.pts - x.pts ||
+      y.gd - x.gd ||
+      y.gf - x.gf ||
+      x.team.name.localeCompare(y.team.name)
+  );
+  return rows.map((r, i) => ({
+    ...r,
+    rank: i + 1,
+    roundOut: medal[r.team.name]?.label ?? ELIM_LABEL[furthest.get(r.team.name) ?? 0],
+  }));
+}
 
 export const QUALIFIED_ISO3 = Array.from(new Set(TEAMS.map((t) => t.iso3)));

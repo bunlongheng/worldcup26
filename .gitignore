@@ -47,3 +47,6 @@ CLAUDE.md
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# player-data generator resume cache
+scripts/.players-cache.json
