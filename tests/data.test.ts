@@ -15,6 +15,7 @@ import {
   textOn,
   GROUP_ACCENTS,
   KNOCKOUT_TOPOLOGY,
+  finalRanking,
 } from "../app/data/teams.ts";
 
 // WCAG contrast ratio between two sRGB hex colors (for asserting textOn picks well).
@@ -104,8 +105,8 @@ test("group standings: Group A tops with Mexico on 9", () => {
 });
 
 test("koResult orients the score + winner and flags pens; group-only pairs are null", () => {
-  assert.deepEqual(koResult("Spain", "Argentina"), { sa: 0, sb: 1, pens: undefined, win: "b" });
-  assert.deepEqual(koResult("Argentina", "Spain"), { sa: 1, sb: 0, pens: undefined, win: "a" });
+  assert.deepEqual(koResult("Spain", "Argentina"), { sa: 2, sb: 1, pens: undefined, win: "a" });
+  assert.deepEqual(koResult("Argentina", "Spain"), { sa: 1, sb: 2, pens: undefined, win: "b" });
   const pens = koResult("Switzerland", "Colombia");
   assert.equal(pens?.sa, 0);
   assert.equal(pens?.sb, 0);
@@ -138,9 +139,11 @@ test("bracket topology never drifts from MATCHES", () => {
     }
   }
 
-  // (c) every non-group, non-final MATCHES row appears exactly once in the topology
+  // (c) every bracket knockout row (not group, not the medal matches) appears once in the topology
   const topo = new Set(KNOCKOUT_TOPOLOGY.flatMap((r) => r.matches.map((m) => key(m.a, m.b))));
-  const knockoutRows = MATCHES.filter((m) => !m.stage.startsWith("Group") && m.stage !== "Final");
+  const knockoutRows = MATCHES.filter(
+    (m) => !m.stage.startsWith("Group") && m.stage !== "Final" && m.stage !== "Third place"
+  );
   assert.equal(topo.size, knockoutRows.length, "topology and MATCHES knockout counts differ");
   for (const m of knockoutRows) {
     assert.ok(topo.has(key(m.a, m.b)), `${m.stage} ${m.a} v ${m.b} is missing from the bracket topology`);
@@ -177,10 +180,31 @@ test("textOn picks the higher-contrast text and clears WCAG AA on every group ac
 });
 
 test("koWinner returns the advancing team both ways round", () => {
-  assert.equal(koWinner("Spain", "Argentina"), "Argentina");
-  assert.equal(koWinner("Argentina", "Spain"), "Argentina");
+  assert.equal(koWinner("Spain", "Argentina"), "Spain");
+  assert.equal(koWinner("Argentina", "Spain"), "Spain");
   assert.equal(koWinner("Switzerland", "Colombia"), "Switzerland"); // won on pens
   assert.equal(koWinner("Mexico", "South Africa"), null);
+});
+
+test("finalRanking ranks all 48 uniquely, champion first, derived from the results", () => {
+  const r = finalRanking();
+  assert.equal(r.length, 48, "every nation is ranked");
+  assert.deepEqual(
+    r.map((x) => x.rank),
+    Array.from({ length: 48 }, (_, i) => i + 1),
+    "ranks are 1..48 in order with no gaps or ties"
+  );
+  assert.equal(r[0].team.name, "Spain", "champion is #1");
+  assert.equal(r[0].roundOut, "Champion");
+  assert.equal(r[1].team.name, "Argentina", "final's loser is #2");
+  assert.equal(r[1].roundOut, "Runner-up");
+  // the third-place playoff decides 3rd/4th: England beat France for the bronze
+  assert.equal(r[2].team.name, "England", "third-place winner is #3");
+  assert.equal(r[2].roundOut, "Third place");
+  assert.equal(r[3].team.name, "France", "third-place loser is #4");
+  assert.equal(r[3].roundOut, "Fourth place");
+  // exactly 16 nations went out in the group stage (48 - 32 that advanced)
+  assert.equal(r.filter((x) => x.roundOut === "Group stage").length, 16);
 });
 
 test("every knockout shootout is level in normal time and a-side wins the pens", () => {

@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Flag from "../Flag";
 import Logo from "../Logo";
-import { TEAM_BY_NAME, koResult, koWinner, KNOCKOUT_TOPOLOGY } from "../../data/teams";
+import CountryCard from "../CountryCard";
+import CountryModal from "../CountryModal";
+import { TEAM_BY_NAME, koResult, koWinner, KNOCKOUT_TOPOLOGY, type Team } from "../../data/teams";
 
 // Topology (who meets whom) lives in teams.ts beside MATCHES; every OUTCOME - scores,
 // winners, the final, the champion - is derived here from MATCHES via koResult/koWinner,
@@ -24,12 +29,14 @@ function TeamCell({
   score,
   pens,
   divider,
+  onSelect,
 }: {
   name: string | null;
   state: CellState;
   score?: number | null;
   pens?: string;
   divider: boolean;
+  onSelect: (t: Team) => void;
 }) {
   const t = name ? TEAM_BY_NAME[name] : undefined;
   const tone =
@@ -38,11 +45,13 @@ function TeamCell({
       : state === "lose"
         ? "font-medium text-[var(--muted)]"
         : "font-semibold text-[var(--navy)]";
+  const Tag = t ? "button" : "div";
   return (
-    <div
-      className={`flex items-center gap-1 rounded-md px-1 py-1.5 sm:gap-2.5 sm:px-2 sm:py-2 ${
+    <Tag
+      {...(t ? { type: "button" as const, onClick: () => onSelect(t), "aria-label": `${t.name}, view details` } : {})}
+      className={`flex w-full items-center gap-1 rounded-md px-1 py-1.5 text-left sm:gap-2.5 sm:px-2 sm:py-2 ${
         divider ? "border-b border-[var(--border)]" : ""
-      } ${state === "win" ? "bg-[rgba(42,157,63,0.12)]" : ""}`}
+      } ${state === "win" ? "bg-[rgba(42,157,63,0.12)]" : ""} ${t ? "transition-colors hover:bg-[var(--bg-2)]" : ""}`}
     >
       {t && (
         <Flag
@@ -63,23 +72,26 @@ function TeamCell({
         )}
         {state === "win" && <span className="text-xs font-bold text-[var(--green)] sm:text-sm">✓</span>}
       </span>
-    </div>
+    </Tag>
   );
 }
 
 // One knockout card, fully derived from MATCHES.
-function MatchCard({ a, b }: { a: string | null; b: string | null }) {
+function MatchCard({ a, b, onSelect }: { a: string | null; b: string | null; onSelect: (t: Team) => void }) {
   const r = a && b ? koResult(a, b) : null;
   return (
     <div className="rounded-md border border-[var(--border)] bg-white px-0.5 py-0.5 shadow-sm sm:rounded-lg sm:px-1.5 sm:py-1">
-      <TeamCell name={a} state={stateFor(r?.win, "a")} score={r?.sa ?? null} pens={r?.pens} divider />
-      <TeamCell name={b} state={stateFor(r?.win, "b")} score={r?.sb ?? null} pens={r?.pens} divider={false} />
+      <TeamCell name={a} state={stateFor(r?.win, "a")} score={r?.sa ?? null} pens={r?.pens} divider onSelect={onSelect} />
+      <TeamCell name={b} state={stateFor(r?.win, "b")} score={r?.sb ?? null} pens={r?.pens} divider={false} onSelect={onSelect} />
     </div>
   );
 }
 
-/* Knockout bracket - topology is fixed, every score/winner/champion is derived from MATCHES. */
+/* Knockout bracket - topology is fixed, every score/winner/champion is derived from MATCHES.
+   Tapping any team opens its country modal (name spoken, flag blurred behind). */
 export default function BracketView() {
+  const [open, setOpen] = useState<Team | null>(null);
+  const champ = CHAMPION ? TEAM_BY_NAME[CHAMPION] : undefined;
   return (
     <div>
       <div
@@ -97,7 +109,7 @@ export default function BracketView() {
               </h4>
               <div className="flex flex-1 flex-col justify-around gap-2">
                 {round.matches.map((m, k) => (
-                  <MatchCard key={k} a={m.a} b={m.b} />
+                  <MatchCard key={k} a={m.a} b={m.b} onSelect={setOpen} />
                 ))}
               </div>
             </div>
@@ -110,7 +122,7 @@ export default function BracketView() {
               <span className="hidden sm:inline">Final</span>
             </h4>
             <div className="flex flex-1 flex-col justify-center">
-              <MatchCard a={FINALISTS[0]} b={FINALISTS[1]} />
+              <MatchCard a={FINALISTS[0]} b={FINALISTS[1]} onSelect={setOpen} />
               <p className="mt-2 text-center text-[9px] text-[var(--muted)] sm:text-[10px]">July 19</p>
             </div>
           </div>
@@ -121,19 +133,31 @@ export default function BracketView() {
               <span className="sm:hidden">CH</span>
               <span className="hidden sm:inline">Champion</span>
             </h4>
-            <div className="grid place-items-center rounded-lg border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-1.5 py-3 sm:rounded-xl sm:px-5 sm:py-6">
+            <button
+              type="button"
+              onClick={() => champ && setOpen(champ)}
+              disabled={!champ}
+              aria-label={champ ? `${champ.name}, champion, view details` : "Champion to be decided"}
+              className="grid w-full place-items-center rounded-lg border border-[var(--gold)] bg-[rgba(233,185,73,0.1)] px-1.5 py-3 transition-colors hover:bg-[rgba(233,185,73,0.2)] disabled:cursor-default disabled:hover:bg-[rgba(233,185,73,0.1)] sm:rounded-xl sm:px-5 sm:py-6"
+            >
               <Logo className="h-10 w-auto sm:h-16" />
               <div className="mt-1 flex items-center justify-center gap-1.5 sm:mt-2">
-                {CHAMPION && TEAM_BY_NAME[CHAMPION] && (
-                  <Flag code={TEAM_BY_NAME[CHAMPION].flag} name={CHAMPION} className="h-4 w-6 shrink-0 sm:h-6 sm:w-9" />
+                {champ && (
+                  <Flag code={champ.flag} name={champ.name} className="h-4 w-6 shrink-0 sm:h-6 sm:w-9" />
                 )}
                 <span className="text-center text-sm font-extrabold text-[var(--navy)] sm:text-lg">{CHAMPION ?? "TBD"}</span>
               </div>
               <span className="mt-1 text-[10px] text-[var(--muted)] sm:text-[11px]">Crowned July 19</span>
-            </div>
+            </button>
           </div>
         </div>
       </div>
+
+      {open && (
+        <CountryModal team={open} onClose={() => setOpen(null)} maxWidth="max-w-sm">
+          <CountryCard team={open} big />
+        </CountryModal>
+      )}
     </div>
   );
 }
