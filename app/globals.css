@@ -99,6 +99,59 @@ body {
   }
 }
 
+/* Player trading card: 2 full spins in from below, like a card tossed on the table */
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(70px) scale(0.2) rotateY(-720deg);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateY(0deg);
+  }
+}
+.card-enter {
+  animation: cardEnter 0.95s cubic-bezier(0.22, 0.85, 0.3, 1) both;
+}
+
+/* Foil shimmer that sweeps across the card frame once it lands */
+@keyframes foilSweep {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+.foil-frame {
+  background: linear-gradient(
+    115deg,
+    #8a6d1f 0%,
+    var(--gold) 18%,
+    #fff3c4 32%,
+    var(--gold) 46%,
+    #8a6d1f 60%,
+    var(--gold) 78%,
+    #fff3c4 92%,
+    var(--gold) 100%
+  );
+  background-size: 200% 200%;
+  animation: foilSweep 3.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-enter {
+    animation: none;
+    opacity: 1;
+  }
+  .foil-frame {
+    animation: none;
+  }
+}
+
 /* Floating ball idle bob (plays only when the ball is at rest) */
 @keyframes ballBob {
   0%, 100% { transform: translateY(0); }

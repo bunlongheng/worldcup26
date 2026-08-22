@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Flag from "../Flag";
 import Logo from "../Logo";
-import CountryCard from "../CountryCard";
-import CountryModal from "../CountryModal";
+import TeamMatchesModal from "../TeamMatchesModal";
 import { TEAM_BY_NAME, koResult, koWinner, KNOCKOUT_TOPOLOGY, type Team } from "../../data/teams";
 
 // Topology (who meets whom) lives in teams.ts beside MATCHES; every OUTCOME - scores,
@@ -88,7 +87,7 @@ function MatchCard({ a, b, onSelect }: { a: string | null; b: string | null; onS
 }
 
 /* Knockout bracket - topology is fixed, every score/winner/champion is derived from MATCHES.
-   Tapping any team opens its country modal (name spoken, flag blurred behind). */
+   Tapping any team opens the shared match-results modal (name spoken, flag blurred behind). */
 export default function BracketView() {
   const [open, setOpen] = useState<Team | null>(null);
   const champ = CHAMPION ? TEAM_BY_NAME[CHAMPION] : undefined;
@@ -153,11 +152,7 @@ export default function BracketView() {
         </div>
       </div>
 
-      {open && (
-        <CountryModal team={open} onClose={() => setOpen(null)} maxWidth="max-w-sm">
-          <CountryCard team={open} big />
-        </CountryModal>
-      )}
+      {open && <TeamMatchesModal team={open} onClose={() => setOpen(null)} />}
     </div>
   );
 }
