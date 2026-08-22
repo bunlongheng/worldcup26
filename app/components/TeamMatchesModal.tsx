@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Flag from "./Flag";
 import CountryModal from "./CountryModal";
+import TeamSquad from "./TeamSquad";
+import PlayerCard from "./PlayerCard";
+import { playersFor, type Player } from "../data/players";
 import {
   GROUP_ACCENTS,
   HOST_STADIUMS,
@@ -25,16 +29,56 @@ const shortStage = (s: string) =>
 
 /* The one country match-center modal, shared by Groups, Rank, and Bracket:
    flag hero, group chip, every match with its score and W/D/L badge, and host
-   stadiums for the 3 host nations. */
+   stadiums for the 3 host nations. Tapping the hero flag switches to the
+   nation's squad, where tapping a player spins up their trading card. */
 export default function TeamMatchesModal({ team, onClose }: { team: Team; onClose: () => void }) {
+  const [squad, setSquad] = useState(false);
+  const [card, setCard] = useState<Player | null>(null);
   const results = matchesFor(team.name);
   const accent = GROUP_ACCENTS[team.group];
+  const hasSquad = playersFor(team.name).length > 0;
+
+  if (squad) {
+    return (
+      <>
+        <CountryModal team={team} onClose={onClose} label={`${team.name} squad`} maxWidth="max-w-lg">
+          <button
+            type="button"
+            onClick={() => setSquad(false)}
+            className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.06em] text-[var(--muted)] transition-colors hover:text-[var(--navy)]"
+          >
+            <span aria-hidden>←</span> Matches
+          </button>
+          <TeamSquad team={team} onSelect={setCard} />
+        </CountryModal>
+        {card && <PlayerCard player={card} team={team} onClose={() => setCard(null)} />}
+      </>
+    );
+  }
 
   return (
     <CountryModal team={team} onClose={onClose} label={`${team.name} matches`}>
       <div className="flex flex-col items-center text-center">
-        <Flag code={team.flag} name={team.name} className="h-[86px] w-[128px]" />
-        <span className="mt-3 text-2xl font-extrabold text-[var(--navy)]">{team.name}</span>
+        <button
+          type="button"
+          onClick={() => hasSquad && setSquad(true)}
+          disabled={!hasSquad}
+          aria-label={`${team.name}: view squad`}
+          title="View squad"
+          className="group flex flex-col items-center disabled:cursor-default"
+        >
+          <Flag
+            code={team.flag}
+            name={team.name}
+            className="h-[86px] w-[128px] transition-transform group-hover:-translate-y-0.5 group-hover:shadow-[0_10px_22px_-10px_rgba(20,33,61,0.5)]"
+          />
+          {hasSquad && (
+            <span className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] transition-colors group-hover:text-[var(--navy)]">
+              Tap flag for squad
+            </span>
+          )}
+        </button>
+        <span className="mt-1.5 text-2xl font-extrabold text-[var(--navy)]">{team.name}</span>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <span
             className="rounded-full px-3 py-1 text-xs font-bold"
