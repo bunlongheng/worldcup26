@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { setSoundOn } from "./soundState";
 
 // Official WC26 theme song, served as a local audio file (reliable, unlike the
 // YouTube embed). Browsers block sound-on-load until a gesture, so it also starts
@@ -25,7 +24,7 @@ export default function ThemeSong() {
     tryPlay();
 
     const kick = (e: PointerEvent) => {
-      // If the first tap IS the Sound button, let its own onClick handle it - otherwise
+      // If the first tap IS the Theme button, let its own onClick handle it - otherwise
       // the auto-start here and the button's toggle cancel out (starts then pauses).
       if ((e.target as Element | null)?.closest?.("[data-theme-toggle]")) return;
       tryPlay();
@@ -54,14 +53,8 @@ export default function ThemeSong() {
         src="/theme.mp3"
         loop
         preload="none"
-        onPlay={() => {
-          setPlaying(true);
-          setSoundOn(true);
-        }}
-        onPause={() => {
-          setPlaying(false);
-          setSoundOn(false);
-        }}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
       />
 
       <button
@@ -69,7 +62,7 @@ export default function ThemeSong() {
         data-theme-toggle
         onClick={toggle}
         aria-pressed={playing}
-        title={playing ? "Sound on - tap to mute" : "Play the theme song"}
+        title={playing ? "Theme song on - tap to pause" : "Play the theme song"}
         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition-colors ${
           playing
             ? "border-[var(--green)] bg-[var(--green)] text-white"
@@ -87,7 +80,7 @@ export default function ThemeSong() {
             <span className="ml-[3px] block border-y-[6px] border-l-[9px] border-y-transparent border-l-[var(--green)]" />
           )}
         </span>
-        Sound
+        Theme
       </button>
     </>
   );
