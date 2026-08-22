@@ -5,7 +5,7 @@ import Flag from "../Flag";
 import PlayerPhoto from "../PlayerPhoto";
 import { speak } from "../speak";
 import { TEAM_BY_NAME } from "../../data/teams";
-import { PLAYER_POOL, TEAMS_WITH_PLAYERS, type Player } from "../../data/players";
+import { PLAYER_POOL, TEAMS_WITH_PLAYERS, POS_LABEL, type Player } from "../../data/players";
 
 type Question = { player: Player; team: string; options: string[] };
 
@@ -63,7 +63,9 @@ export default function PlayerQuiz() {
       <PlayerPhoto src={q.player.img} name={q.player.name} className="h-56 w-44 rounded-2xl ring-1 ring-black/10" />
       <p className="mt-3 text-xl font-extrabold text-[var(--navy)]">{q.player.name}</p>
       {q.player.pos && (
-        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{q.player.pos}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+          {POS_LABEL[q.player.pos] ?? q.player.pos}
+        </p>
       )}
 
       <div className="mt-5 grid w-full grid-cols-2 gap-2.5">

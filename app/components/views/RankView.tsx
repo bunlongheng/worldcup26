@@ -2,14 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Flag from "../Flag";
-import CountryModal from "../CountryModal";
-import {
-  finalRanking,
-  matchesFor,
-  matchOutcome,
-  TEAM_BY_NAME,
-  type Team,
-} from "../../data/teams";
+import TeamMatchesModal from "../TeamMatchesModal";
+import { finalRanking, type Team } from "../../data/teams";
 
 // Podium accents for the top 3; every other rank is the plain muted chip.
 const MEDAL: Record<number, string> = {
@@ -17,17 +11,6 @@ const MEDAL: Record<number, string> = {
   2: "#c8ccd4",
   3: "#cd7f47",
 };
-
-const STAGE_SHORT: Record<string, string> = {
-  "Round of 32": "R32",
-  "Round of 16": "R16",
-  "Quarter-final": "QF",
-  "Semi-final": "SF",
-  "Third place": "3RD",
-  Final: "F",
-};
-const shortStage = (s: string) =>
-  STAGE_SHORT[s] ?? (s.startsWith("Group") ? s.replace("Group ", "GRP ") : s);
 
 // Signed goal difference, e.g. +8 / -3 / 0, colored by sign.
 function gdText(gd: number) {
@@ -43,7 +26,6 @@ function gdColor(gd: number) {
 export default function RankView() {
   const rows = useMemo(() => finalRanking(), []);
   const [open, setOpen] = useState<Team | null>(null);
-  const matches = open ? matchesFor(open.name) : [];
 
   return (
     <>
@@ -98,59 +80,7 @@ export default function RankView() {
         })}
       </ol>
 
-      {open && (
-        <CountryModal team={open} onClose={() => setOpen(null)} label={`${open.name} match results`} maxWidth="max-w-md">
-          <div className="mb-3 flex items-center gap-3">
-            <Flag code={open.flag} name={open.name} className="h-8 w-12 shrink-0" />
-            <div className="min-w-0">
-              <h3 className="truncate text-lg font-extrabold text-[var(--navy)]">{open.name}</h3>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Match results</p>
-            </div>
-          </div>
-          {matches.length ? (
-            <ul className="divide-y divide-[var(--border)]">
-              {matches.map((m, i) => {
-                const isA = m.a === open.name;
-                const opp = isA ? m.b : m.a;
-                const ts = isA ? m.sa : m.sb;
-                const os = isA ? m.sb : m.sa;
-                const oppTeam = TEAM_BY_NAME[opp];
-                const result = matchOutcome(m, isA);
-                const rc =
-                  result === "won"
-                    ? "bg-[var(--green)]"
-                    : result === "lost"
-                      ? "bg-[var(--maroon)]"
-                      : result === "draw"
-                        ? "bg-[var(--muted)]"
-                        : "bg-[var(--gold)]";
-                const rl = result === "won" ? "W" : result === "lost" ? "L" : result === "draw" ? "D" : "•";
-                return (
-                  <li key={i} className="flex items-center gap-2 py-2">
-                    <span className="w-8 shrink-0 text-[9px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                      {shortStage(m.stage)}
-                    </span>
-                    <Flag code={open.flag} name={open.name} className="h-4 w-6 shrink-0" />
-                    <span className="shrink-0 tabular-nums text-sm font-extrabold text-[var(--navy)]">
-                      {ts == null || os == null ? <span className="font-semibold text-[var(--muted)]">vs</span> : `${ts}-${os}`}
-                    </span>
-                    {oppTeam && <Flag code={oppTeam.flag} name={opp} className="h-4 w-6 shrink-0" />}
-                    <span className="min-w-0 flex-1 truncate text-left text-sm font-semibold text-[var(--navy)]">
-                      {opp}
-                      {m.pens ? <span className="text-[10px] font-normal text-[var(--muted)]"> ({m.pens})</span> : null}
-                    </span>
-                    <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white ${rc}`}>
-                      {rl}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-sm text-[var(--muted)]">No matches found.</p>
-          )}
-        </CountryModal>
-      )}
+      {open && <TeamMatchesModal team={open} onClose={() => setOpen(null)} />}
     </>
   );
 }
