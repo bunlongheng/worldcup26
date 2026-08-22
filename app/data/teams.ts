@@ -320,10 +320,10 @@ export const MATCHES: MatchRow[] = [
   // Semi-finals: France lost to Spain; Argentina beat England 2-1
   { stage: "Semi-final", a: "France", b: "Spain", sa: 0, sb: 2 },
   { stage: "Semi-final", a: "England", b: "Argentina", sa: 1, sb: 2 },
-  // Third-place playoff: England beat France 2-1 for the bronze
-  { stage: "Third place", a: "England", b: "France", sa: 2, sb: 1 },
-  // Final: Spain beat Argentina 2-1 to win the 2026 World Cup
-  { stage: "Final", a: "Spain", b: "Argentina", sa: 2, sb: 1 },
+  // Third-place playoff: England beat France 6-4 for the bronze (Saka hat trick)
+  { stage: "Third place", a: "England", b: "France", sa: 6, sb: 4 },
+  // Final: Spain beat Argentina 1-0 after extra time (Ferran Torres 106')
+  { stage: "Final", a: "Spain", b: "Argentina", sa: 1, sb: 0 },
 ];
 
 export function matchesFor(name: string): MatchRow[] {

@@ -105,8 +105,8 @@ test("group standings: Group A tops with Mexico on 9", () => {
 });
 
 test("koResult orients the score + winner and flags pens; group-only pairs are null", () => {
-  assert.deepEqual(koResult("Spain", "Argentina"), { sa: 2, sb: 1, pens: undefined, win: "a" });
-  assert.deepEqual(koResult("Argentina", "Spain"), { sa: 1, sb: 2, pens: undefined, win: "b" });
+  assert.deepEqual(koResult("Spain", "Argentina"), { sa: 1, sb: 0, pens: undefined, win: "a" });
+  assert.deepEqual(koResult("Argentina", "Spain"), { sa: 0, sb: 1, pens: undefined, win: "b" });
   const pens = koResult("Switzerland", "Colombia");
   assert.equal(pens?.sa, 0);
   assert.equal(pens?.sb, 0);
