@@ -11833,5 +11833,794 @@
       "goals": 0,
       "age": 23
     }
+  ],
+  "Croatia": [
+    {
+      "no": 1,
+      "name": "Dominik Livaković",
+      "pos": "GK",
+      "img": "/players/croatia-dominik-livakovic.png",
+      "club": "Dinamo Zagreb",
+      "caps": 75,
+      "goals": 0,
+      "age": 31
+    },
+    {
+      "no": 2,
+      "name": "Josip Stanišić",
+      "pos": "DF",
+      "img": "/players/croatia-josip-stanisic.png",
+      "club": "Bayern Munich",
+      "caps": 31,
+      "goals": 0,
+      "age": 26
+    },
+    {
+      "no": 3,
+      "name": "Marin Pongračić",
+      "pos": "DF",
+      "img": "/players/croatia-marin-pongracic.png",
+      "club": "Fiorentina",
+      "caps": 20,
+      "goals": 0,
+      "age": 28
+    },
+    {
+      "no": 4,
+      "name": "Joško Gvardiol",
+      "pos": "DF",
+      "img": "/players/croatia-josko-gvardiol.png",
+      "club": "Manchester City",
+      "caps": 48,
+      "goals": 4,
+      "age": 24
+    },
+    {
+      "no": 5,
+      "name": "Duje Ćaleta-Car",
+      "pos": "DF",
+      "img": "/players/croatia-duje-caleta-car.png",
+      "club": "Real Sociedad",
+      "caps": 38,
+      "goals": 1,
+      "age": 29
+    },
+    {
+      "no": 6,
+      "name": "Josip Šutalo",
+      "pos": "DF",
+      "img": "/players/croatia-josip-sutalo.png",
+      "club": "Ajax",
+      "caps": 33,
+      "goals": 0,
+      "age": 26
+    },
+    {
+      "no": 7,
+      "name": "Nikola Moro",
+      "pos": "MF",
+      "img": "/players/croatia-nikola-moro.png",
+      "club": "Bologna",
+      "caps": 10,
+      "goals": 0,
+      "age": 28
+    },
+    {
+      "no": 8,
+      "name": "Mateo Kovačić",
+      "pos": "MF",
+      "img": "/players/croatia-mateo-kovacic.png",
+      "club": "Manchester City",
+      "caps": 113,
+      "goals": 5,
+      "age": 32
+    },
+    {
+      "no": 9,
+      "name": "Andrej Kramarić",
+      "pos": "FW",
+      "img": "/players/croatia-andrej-kramaric.png",
+      "club": "TSG Hoffenheim",
+      "caps": 116,
+      "goals": 36,
+      "age": 34
+    },
+    {
+      "no": 10,
+      "name": "Luka Modrić",
+      "pos": "MF",
+      "img": "/players/croatia-luka-modric.png",
+      "captain": true,
+      "club": "AC Milan",
+      "caps": 198,
+      "goals": 29,
+      "age": 40
+    },
+    {
+      "no": 11,
+      "name": "Ante Budimir",
+      "pos": "FW",
+      "img": "/players/croatia-ante-budimir.png",
+      "club": "Osasuna",
+      "caps": 38,
+      "goals": 6,
+      "age": 34
+    },
+    {
+      "no": 12,
+      "name": "Ivor Pandur",
+      "pos": "GK",
+      "img": "/players/croatia-ivor-pandur.png",
+      "club": "Hull City",
+      "caps": 0,
+      "goals": 0,
+      "age": 26
+    },
+    {
+      "no": 13,
+      "name": "Nikola Vlašić",
+      "pos": "MF",
+      "img": "/players/croatia-nikola-vlasic.png",
+      "club": "Torino",
+      "caps": 63,
+      "goals": 10,
+      "age": 28
+    },
+    {
+      "no": 14,
+      "name": "Ivan Perišić",
+      "pos": "FW",
+      "img": "/players/croatia-ivan-perisic.png",
+      "club": "PSV Eindhoven",
+      "caps": 154,
+      "goals": 38,
+      "age": 37
+    },
+    {
+      "no": 15,
+      "name": "Mario Pašalić",
+      "pos": "MF",
+      "img": "/players/croatia-mario-pasalic.png",
+      "club": "Atalanta",
+      "caps": 85,
+      "goals": 12,
+      "age": 31
+    },
+    {
+      "no": 16,
+      "name": "Martin Baturina",
+      "pos": "MF",
+      "img": "/players/croatia-martin-baturina.png",
+      "club": "Como",
+      "caps": 19,
+      "goals": 1,
+      "age": 23
+    },
+    {
+      "no": 17,
+      "name": "Petar Sučić",
+      "pos": "MF",
+      "img": "/players/croatia-petar-sucic.png",
+      "club": "Inter Milan",
+      "caps": 17,
+      "goals": 1,
+      "age": 22
+    },
+    {
+      "no": 18,
+      "name": "Kristijan Jakić",
+      "pos": "DF",
+      "img": "/players/croatia-kristijan-jakic.png",
+      "club": "FC Augsburg",
+      "caps": 17,
+      "goals": 2,
+      "age": 29
+    },
+    {
+      "no": 19,
+      "name": "Toni Fruk",
+      "pos": "MF",
+      "img": "/players/croatia-toni-fruk.png",
+      "club": "Rijeka",
+      "caps": 7,
+      "goals": 1,
+      "age": 25
+    },
+    {
+      "no": 20,
+      "name": "Igor Matanović",
+      "pos": "FW",
+      "img": "/players/croatia-igor-matanovic.png",
+      "club": "SC Freiburg",
+      "caps": 9,
+      "goals": 2,
+      "age": 23
+    },
+    {
+      "no": 21,
+      "name": "Luka Sučić",
+      "pos": "MF",
+      "img": "/players/croatia-luka-sucic.png",
+      "club": "Real Sociedad",
+      "caps": 21,
+      "goals": 1,
+      "age": 23
+    },
+    {
+      "no": 22,
+      "name": "Luka Vušković",
+      "pos": "DF",
+      "img": "/players/croatia-luka-vuskovic.png",
+      "club": "Hamburger SV",
+      "caps": 5,
+      "goals": 1,
+      "age": 19
+    },
+    {
+      "no": 23,
+      "name": "Dominik Kotarski",
+      "pos": "GK",
+      "img": "/players/croatia-dominik-kotarski.png",
+      "club": "Copenhagen",
+      "caps": 4,
+      "goals": 0,
+      "age": 26
+    },
+    {
+      "no": 24,
+      "name": "Marco Pašalić",
+      "pos": "FW",
+      "img": "/players/croatia-marco-pasalic.png",
+      "club": "Orlando City SC",
+      "caps": 15,
+      "goals": 1,
+      "age": 25
+    },
+    {
+      "no": 25,
+      "name": "Martin Erlić",
+      "pos": "DF",
+      "img": "/players/croatia-martin-erlic.png",
+      "club": "Midtjylland",
+      "caps": 13,
+      "goals": 1,
+      "age": 28
+    },
+    {
+      "no": 26,
+      "name": "Petar Musa",
+      "pos": "FW",
+      "img": "/players/croatia-petar-musa.png",
+      "club": "FC Dallas",
+      "caps": 11,
+      "goals": 1,
+      "age": 28
+    }
+  ],
+  "Ghana": [
+    {
+      "no": 1,
+      "name": "Lawrence Ati-Zigi",
+      "pos": "GK",
+      "img": "/players/ghana-lawrence-ati-zigi.png",
+      "club": "St. Gallen",
+      "caps": 29,
+      "goals": 0,
+      "age": 29
+    },
+    {
+      "no": 2,
+      "name": "Alidu Seidu",
+      "pos": "DF",
+      "img": "/players/ghana-alidu-seidu.png",
+      "club": "Rennes",
+      "caps": 24,
+      "goals": 1,
+      "age": 26
+    },
+    {
+      "no": 3,
+      "name": "Caleb Yirenkyi",
+      "pos": "MF",
+      "img": "/players/ghana-caleb-yirenkyi.png",
+      "club": "Nordsjælland",
+      "caps": 11,
+      "goals": 1,
+      "age": 20
+    },
+    {
+      "no": 4,
+      "name": "Jonas Adjetey",
+      "pos": "DF",
+      "img": "/players/ghana-jonas-adjetey.png",
+      "club": "VfL Wolfsburg",
+      "caps": 10,
+      "goals": 0,
+      "age": 22
+    },
+    {
+      "no": 5,
+      "name": "Thomas Partey",
+      "pos": "MF",
+      "img": "/players/ghana-thomas-partey.png",
+      "club": "Villarreal",
+      "caps": 57,
+      "goals": 15,
+      "age": 32
+    },
+    {
+      "no": 6,
+      "name": "Abdul Mumin",
+      "pos": "DF",
+      "img": "/players/ghana-abdul-mumin.png",
+      "club": "Rayo Vallecano",
+      "caps": 5,
+      "goals": 0,
+      "age": 28
+    },
+    {
+      "no": 7,
+      "name": "Abdul Fatawu",
+      "pos": "FW",
+      "img": "/players/ghana-abdul-fatawu.png",
+      "club": "Leicester City",
+      "caps": 28,
+      "goals": 3,
+      "age": 22
+    },
+    {
+      "no": 8,
+      "name": "Kwasi Sibo",
+      "pos": "MF",
+      "img": "/players/ghana-kwasi-sibo.png",
+      "club": "Oviedo",
+      "caps": 8,
+      "goals": 0,
+      "age": 27
+    },
+    {
+      "no": 9,
+      "name": "Jordan Ayew",
+      "pos": "FW",
+      "img": "/players/ghana-jordan-ayew.png",
+      "captain": true,
+      "club": "Leicester City",
+      "caps": 120,
+      "goals": 34,
+      "age": 34
+    },
+    {
+      "no": 10,
+      "name": "Brandon Thomas-Asante",
+      "pos": "FW",
+      "img": "/players/ghana-brandon-thomas-asante.png",
+      "club": "Coventry City",
+      "caps": 8,
+      "goals": 1,
+      "age": 27
+    },
+    {
+      "no": 11,
+      "name": "Antoine Semenyo",
+      "pos": "MF",
+      "img": "/players/ghana-antoine-semenyo.png",
+      "club": "Manchester City",
+      "caps": 34,
+      "goals": 3,
+      "age": 26
+    },
+    {
+      "no": 12,
+      "name": "Joseph Anang",
+      "pos": "GK",
+      "img": "/players/ghana-joseph-anang.png",
+      "club": "St Patrick's Athletic",
+      "caps": 1,
+      "goals": 0,
+      "age": 26
+    },
+    {
+      "no": 13,
+      "name": "Christopher Bonsu Baah",
+      "pos": "FW",
+      "img": "/players/ghana-christopher-bonsu-baah.png",
+      "club": "Al-Qadsiah",
+      "caps": 9,
+      "goals": 0,
+      "age": 21
+    },
+    {
+      "no": 14,
+      "name": "Gideon Mensah",
+      "pos": "DF",
+      "img": "/players/ghana-gideon-mensah.png",
+      "club": "Auxerre",
+      "caps": 40,
+      "goals": 0,
+      "age": 27
+    },
+    {
+      "no": 15,
+      "name": "Elisha Owusu",
+      "pos": "MF",
+      "img": "/players/ghana-elisha-owusu.png",
+      "club": "Auxerre",
+      "caps": 20,
+      "goals": 0,
+      "age": 28
+    },
+    {
+      "no": 16,
+      "name": "Benjamin Asare",
+      "pos": "GK",
+      "img": "/players/ghana-benjamin-asare.png",
+      "club": "Hearts of Oak",
+      "caps": 11,
+      "goals": 0,
+      "age": 33
+    },
+    {
+      "no": 17,
+      "name": "Abdul Rahman Baba",
+      "pos": "DF",
+      "img": "",
+      "club": "PAOK",
+      "caps": 51,
+      "goals": 1,
+      "age": 31
+    },
+    {
+      "no": 18,
+      "name": "Jerome Opoku",
+      "pos": "DF",
+      "img": "/players/ghana-jerome-opoku.png",
+      "club": "İstanbul Başakşehir",
+      "caps": 11,
+      "goals": 1,
+      "age": 27
+    },
+    {
+      "no": 19,
+      "name": "Iñaki Williams",
+      "pos": "FW",
+      "img": "/players/ghana-inaki-williams.png",
+      "club": "Athletic Bilbao",
+      "caps": 26,
+      "goals": 2,
+      "age": 31
+    },
+    {
+      "no": 20,
+      "name": "Augustine Boakye",
+      "pos": "MF",
+      "img": "/players/ghana-augustine-boakye.png",
+      "club": "Saint-Étienne",
+      "caps": 0,
+      "goals": 0,
+      "age": 25
+    },
+    {
+      "no": 21,
+      "name": "Kojo Peprah Oppong",
+      "pos": "DF",
+      "img": "/players/ghana-kojo-peprah-oppong.png",
+      "club": "Nice",
+      "caps": 4,
+      "goals": 0,
+      "age": 22
+    },
+    {
+      "no": 22,
+      "name": "Kamaldeen Sulemana",
+      "pos": "FW",
+      "img": "/players/ghana-kamaldeen-sulemana.png",
+      "club": "Atalanta",
+      "caps": 28,
+      "goals": 1,
+      "age": 24
+    },
+    {
+      "no": 23,
+      "name": "Derrick Luckassen",
+      "pos": "DF",
+      "img": "/players/ghana-derrick-luckassen.png",
+      "club": "Pafos",
+      "caps": 1,
+      "goals": 0,
+      "age": 30
+    },
+    {
+      "no": 24,
+      "name": "Ernest Nuamah",
+      "pos": "FW",
+      "img": "/players/ghana-ernest-nuamah.png",
+      "club": "Lyon",
+      "caps": 18,
+      "goals": 4,
+      "age": 22
+    },
+    {
+      "no": 25,
+      "name": "Prince Kwabena Adu",
+      "pos": "FW",
+      "img": "/players/ghana-prince-kwabena-adu.png",
+      "club": "Viktoria Plzeň",
+      "caps": 5,
+      "goals": 0,
+      "age": 22
+    },
+    {
+      "no": 26,
+      "name": "Marvin Senaya",
+      "pos": "DF",
+      "img": "/players/ghana-marvin-senaya.png",
+      "club": "Auxerre",
+      "caps": 2,
+      "goals": 0,
+      "age": 25
+    }
+  ],
+  "Panama": [
+    {
+      "no": 1,
+      "name": "Luis Mejía",
+      "pos": "GK",
+      "img": "/players/panama-luis-mejia.png",
+      "club": "Nacional",
+      "caps": 56,
+      "goals": 0,
+      "age": 35
+    },
+    {
+      "no": 2,
+      "name": "César Blackman",
+      "pos": "DF",
+      "img": "/players/panama-cesar-blackman.png",
+      "club": "Slovan Bratislava",
+      "caps": 40,
+      "goals": 3,
+      "age": 28
+    },
+    {
+      "no": 3,
+      "name": "José Córdoba",
+      "pos": "DF",
+      "img": "/players/panama-jose-cordoba.png",
+      "club": "Norwich City",
+      "caps": 32,
+      "goals": 1,
+      "age": 25
+    },
+    {
+      "no": 4,
+      "name": "Fidel Escobar",
+      "pos": "DF",
+      "img": "/players/panama-fidel-escobar.png",
+      "club": "Saprissa",
+      "caps": 99,
+      "goals": 4,
+      "age": 31
+    },
+    {
+      "no": 5,
+      "name": "Edgardo Fariña",
+      "pos": "DF",
+      "img": "/players/panama-edgardo-farina.png",
+      "club": "Pari Nizhny Novgorod",
+      "caps": 18,
+      "goals": 0,
+      "age": 24
+    },
+    {
+      "no": 6,
+      "name": "Cristian Martínez",
+      "pos": "MF",
+      "img": "/players/panama-cristian-martinez.png",
+      "club": "Ironi Kiryat Shmona",
+      "caps": 66,
+      "goals": 2,
+      "age": 29
+    },
+    {
+      "no": 7,
+      "name": "José Luis Rodríguez",
+      "pos": "MF",
+      "img": "",
+      "club": "Juárez",
+      "caps": 70,
+      "goals": 8,
+      "age": 27
+    },
+    {
+      "no": 8,
+      "name": "Adalberto Carrasquilla",
+      "pos": "MF",
+      "img": "/players/panama-adalberto-carrasquilla.png",
+      "club": "Pumas UNAM",
+      "caps": 73,
+      "goals": 3,
+      "age": 27
+    },
+    {
+      "no": 9,
+      "name": "Tomás Rodríguez",
+      "pos": "FW",
+      "img": "/players/panama-tomas-rodriguez.png",
+      "club": "Saprissa",
+      "caps": 13,
+      "goals": 4,
+      "age": 27
+    },
+    {
+      "no": 10,
+      "name": "Ismael Díaz",
+      "pos": "MF",
+      "img": "/players/panama-ismael-diaz.png",
+      "club": "León",
+      "caps": 57,
+      "goals": 17,
+      "age": 29
+    },
+    {
+      "no": 11,
+      "name": "Yoel Bárcenas",
+      "pos": "MF",
+      "img": "/players/panama-yoel-barcenas.png",
+      "club": "Mazatlán",
+      "caps": 104,
+      "goals": 10,
+      "age": 32
+    },
+    {
+      "no": 12,
+      "name": "César Samudio",
+      "pos": "GK",
+      "img": "/players/panama-cesar-samudio.png",
+      "club": "Marathón",
+      "caps": 5,
+      "goals": 0,
+      "age": 32
+    },
+    {
+      "no": 13,
+      "name": "Jiovany Ramos",
+      "pos": "DF",
+      "img": "/players/panama-jiovany-ramos.png",
+      "club": "Puerto Cabello",
+      "caps": 23,
+      "goals": 2,
+      "age": 29
+    },
+    {
+      "no": 14,
+      "name": "Carlos Harvey",
+      "pos": "DF",
+      "img": "/players/panama-carlos-harvey.png",
+      "club": "Minnesota United FC",
+      "caps": 28,
+      "goals": 3,
+      "age": 26
+    },
+    {
+      "no": 15,
+      "name": "Eric Davis",
+      "pos": "DF",
+      "img": "/players/panama-eric-davis.png",
+      "club": "Plaza Amador",
+      "caps": 107,
+      "goals": 9,
+      "age": 35
+    },
+    {
+      "no": 16,
+      "name": "Andrés Andrade",
+      "pos": "DF",
+      "img": "/players/panama-andres-andrade.png",
+      "club": "LASK",
+      "caps": 50,
+      "goals": 1,
+      "age": 27
+    },
+    {
+      "no": 17,
+      "name": "José Fajardo",
+      "pos": "FW",
+      "img": "/players/panama-jose-fajardo.png",
+      "club": "Universidad Católica",
+      "caps": 68,
+      "goals": 17,
+      "age": 32
+    },
+    {
+      "no": 18,
+      "name": "Cecilio Waterman",
+      "pos": "FW",
+      "img": "/players/panama-cecilio-waterman.png",
+      "club": "Universidad de Concepción",
+      "caps": 55,
+      "goals": 15,
+      "age": 35
+    },
+    {
+      "no": 19,
+      "name": "Alberto Quintero",
+      "pos": "MF",
+      "img": "/players/panama-alberto-quintero.png",
+      "club": "Plaza Amador",
+      "caps": 141,
+      "goals": 7,
+      "age": 38
+    },
+    {
+      "no": 20,
+      "name": "Aníbal Godoy",
+      "pos": "MF",
+      "img": "/players/panama-anibal-godoy.png",
+      "captain": true,
+      "club": "San Diego FC",
+      "caps": 159,
+      "goals": 4,
+      "age": 36
+    },
+    {
+      "no": 21,
+      "name": "César Yanis",
+      "pos": "MF",
+      "img": "/players/panama-cesar-yanis.png",
+      "club": "Cobresal",
+      "caps": 56,
+      "goals": 5,
+      "age": 30
+    },
+    {
+      "no": 22,
+      "name": "Orlando Mosquera",
+      "pos": "GK",
+      "img": "/players/panama-orlando-mosquera.png",
+      "club": "Al-Fayha",
+      "caps": 48,
+      "goals": 0,
+      "age": 31
+    },
+    {
+      "no": 23,
+      "name": "Michael Amir Murillo",
+      "pos": "DF",
+      "img": "/players/panama-michael-amir-murillo.png",
+      "club": "Beşiktaş",
+      "caps": 94,
+      "goals": 9,
+      "age": 30
+    },
+    {
+      "no": 24,
+      "name": "Azarias Londoño",
+      "pos": "FW",
+      "img": "/players/panama-azarias-londono.png",
+      "club": "Universidad Católica",
+      "caps": 11,
+      "goals": 0,
+      "age": 24
+    },
+    {
+      "no": 25,
+      "name": "Roderick Miller",
+      "pos": "DF",
+      "img": "/players/panama-roderick-miller.png",
+      "club": "Turan Tovuz",
+      "caps": 50,
+      "goals": 2,
+      "age": 34
+    },
+    {
+      "no": 26,
+      "name": "Jorge Gutiérrez",
+      "pos": "DF",
+      "img": "/players/panama-jorge-gutierrez.png",
+      "club": "Deportivo La Guaira",
+      "caps": 18,
+      "goals": 0,
+      "age": 27
+    }
   ]
 }
