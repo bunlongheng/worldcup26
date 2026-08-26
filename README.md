@@ -1,3 +1,13 @@
+<div align="center">
+  <img src="docs/icon.png" alt="World Cup 2026" width="96" height="96" />
+  <h1>World Cup 2026</h1>
+  <p><em>Interactive FIFA World Cup 2026 hub: 48 nations, live scores, groups, bracket and a 3D globe</em></p>
+  <p><a href="https://worldcup26-bheng.vercel.app">Live</a> &middot; <a href="https://github.com/bunlongheng/worldcup26">Repo</a> &middot; <a href="https://bunlongheng.com/projects?name=worldcup-2026">Portfolio</a></p>
+  <img src="docs/social-preview.png" alt="World Cup 2026 - preview" width="820" />
+</div>
+
+---
+
 # World Cup 2026
 
 An interactive companion for the 2026 FIFA World Cup: all 48 qualified nations in five linked views - a flag wall, color-coded groups, a live knockout bracket, and the same draw painted onto an interactive 2D world map and a draggable 3D globe. Tap any country for its stats and full match history.
