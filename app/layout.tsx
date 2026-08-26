@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import FloatingBall from "./components/FloatingBall";
+import SwRegister from "./sw-register";
 
 const outfit = Outfit({
   variable: "--font-body",
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "World Cup 2026",
   description:
     "FIFA World Cup 2026 - all 48 qualified nations with flags, groups, a live knockout bracket, and an interactive world map and globe.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -27,6 +29,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         <FloatingBall />
+        <SwRegister />
       </body>
     </html>
   );
