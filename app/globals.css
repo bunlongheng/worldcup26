@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Foldable open screen, flagged on <html> by the inline script in layout.tsx */
+@custom-variant duo (&:where([data-device="duo"], [data-device="duo"] *));
+
 :root {
   /* clean light theme, FIFA 26 accents kept for group tags */
   --bg: #ffffff;

@@ -212,7 +212,7 @@ export default function WorldMap({ mode }: { mode: Mode }) {
       </div>
       <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1 overflow-hidden">
-        <div className={`mx-auto w-max ${isGlobe ? "" : "overflow-hidden rounded-2xl"}`}>
+        <div className={`mx-auto ${isGlobe ? "w-max" : "w-full max-w-[1040px] overflow-hidden rounded-2xl"}`}>
           {status === "error" ? (
             <div
               role="alert"
@@ -234,8 +234,8 @@ export default function WorldMap({ mode }: { mode: Mode }) {
             aria-label={isGlobe ? "Interactive globe of the 48 qualified nations" : "Interactive world map of the 48 qualified nations"}
             className={`block max-w-full touch-none select-none ${
               isGlobe
-                ? "h-[340px] w-auto cursor-grab active:cursor-grabbing sm:h-[calc(100vh_-_230px)] sm:max-h-[820px]"
-                : "h-[190px] w-auto sm:h-[520px]"
+                ? "h-[340px] w-auto cursor-grab active:cursor-grabbing sm:h-[min(calc(100vh_-_230px),calc(100vw_-_48px))] sm:max-h-[820px]"
+                : "h-auto w-full"
             }`}
             onPointerDown={onDown}
             onPointerMove={onMove}

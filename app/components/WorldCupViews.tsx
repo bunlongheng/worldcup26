@@ -66,7 +66,7 @@ export default function WorldCupViews() {
           <ThemeSong />
         </div>
 
-        <nav role="tablist" aria-label="World Cup views" className="flex flex-nowrap gap-1 overflow-x-auto">
+        <nav role="tablist" aria-label="World Cup views" className="flex w-full flex-nowrap gap-1 overflow-x-auto pr-10 [mask-image:linear-gradient(to_right,#000_85%,transparent)] [scrollbar-width:none] sm:w-auto sm:pr-0 sm:[mask-image:none] duo:w-full">
           {TABS.map((tab, i) => {
             const active = view === tab.id;
             return (
@@ -83,7 +83,7 @@ export default function WorldCupViews() {
                 tabIndex={active ? 0 : -1}
                 onClick={() => setView(tab.id)}
                 onKeyDown={(e) => onTabKeyDown(e, i)}
-                className={`shrink-0 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] transition-colors sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.06em] ${
+                className={`shrink-0 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] transition-colors sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.06em] duo:flex-1 duo:px-2 duo:py-2.5 duo:text-[13px] ${
                   active
                     ? "border-[var(--navy)] bg-[var(--navy)] text-white"
                     : "border-[var(--border)] bg-white text-[var(--navy)] hover:border-[var(--navy)]"

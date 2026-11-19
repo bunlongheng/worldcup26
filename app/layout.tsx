@@ -25,7 +25,17 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Foldable open screen (short side 600-767px, touch): flag set before paint and
+            re-checked on resize so folding back to the front screen drops it. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function d(){var e=document.documentElement,m=Math.min(screen.width,screen.height);if(navigator.maxTouchPoints>1&&m>=600&&m<768)e.dataset.device="duo";else delete e.dataset.device}d();addEventListener("resize",d)})()`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         <FloatingBall />

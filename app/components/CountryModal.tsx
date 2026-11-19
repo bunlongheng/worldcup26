@@ -47,14 +47,14 @@ export default function CountryModal({
         aria-modal="true"
         aria-label={label ?? `${team.name} details`}
         tabIndex={-1}
-        className={`reveal relative z-10 max-h-[85vh] w-full ${maxWidth} overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl outline-none`}
+        className={`reveal relative z-10 max-h-[85dvh] w-full ${maxWidth} overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl outline-none`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-colors hover:border-[var(--navy)] hover:text-[var(--navy)]"
+          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border duo:h-10 duo:w-10 border-[var(--border)] text-[var(--muted)] transition-colors hover:border-[var(--navy)] hover:text-[var(--navy)]"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <path d="M6 6l12 12M18 6L6 18" />

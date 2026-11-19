@@ -30,10 +30,10 @@ export default function FlagsView() {
             key={t.name}
             type="button"
             onClick={() => setOpen(t)}
-            className="flex flex-col items-center rounded-xl border border-[var(--border)] bg-white px-2 py-1.5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
+            className="flex flex-col items-center rounded-xl border border-[var(--border)] bg-white px-2 py-1.5 transition-all duo:py-2.5 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-8px_rgba(20,33,61,0.3)]"
           >
-            <Flag code={t.flag} name={t.name} className="h-[40px] w-[60px]" />
-            <span className="mt-1 text-center text-[13px] font-bold leading-tight text-[var(--navy)]">
+            <Flag code={t.flag} name={t.name} className="h-[40px] w-[60px] duo:h-[46px] duo:w-[69px]" />
+            <span className="mt-1 text-center text-[13px] font-bold leading-tight duo:text-[15px] text-[var(--navy)]">
               {t.name}
             </span>
           </button>
